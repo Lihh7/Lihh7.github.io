@@ -1,0 +1,530 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>2-词法分析 | Lihh7's Blog</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="词法分析 词法分析（Lexical analysis 或 Tokenization） 输入：源代码，可以理解为一个字符串 输出：将这个字符串切割得到子串，每个子串称为 \(token\) 其中涉及到的步骤有：  去掉注释 识别字符并且对应到定义好的分类   token token 是语言中的单词，每个token都有一个类别。 而每一个 token class 则对应着">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2-词法分析">
+<meta property="og:url" content="http://example.com/2024/07/19/2-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Lihh7&#39;s Blog">
+<meta property="og:description" content="词法分析 词法分析（Lexical analysis 或 Tokenization） 输入：源代码，可以理解为一个字符串 输出：将这个字符串切割得到子串，每个子串称为 \(token\) 其中涉及到的步骤有：  去掉注释 识别字符并且对应到定义好的分类   token token 是语言中的单词，每个token都有一个类别。 而每一个 token class 则对应着">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-07-19T15:02:08.000Z">
+<meta property="article:modified_time" content="2024-07-19T15:25:36.101Z">
+<meta property="article:author" content="Lihh">
+<meta property="article:tag" content="编译原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/07/19/2-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '2-词法分析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-07-19 23:25:36'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh7's Blog"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">2-词法分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-19T15:02:08.000Z" title="发表于 2024-07-19 23:02:08">2024-07-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-19T15:25:36.101Z" title="更新于 2024-07-19 23:25:36">2024-07-19</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="2-词法分析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="词法分析">词法分析</h1>
+<h2 id="词法分析lexical-analysis-或-tokenization">词法分析（Lexical
+analysis 或 Tokenization）</h2>
+<p><strong>输入</strong>：<strong>源代码</strong>，可以理解为一个字符串</p>
+<p><strong>输出</strong>：将这个字符串<strong>切割</strong>得到子串，每个子串称为
+<span class="math inline">\(token\)</span></p>
+<p>其中涉及到的步骤有：</p>
+<ul>
+<li><p>去掉注释</p></li>
+<li><p>识别字符并且对应到定义好的<strong>分类</strong></p></li>
+</ul>
+<p><img src="词法分析.png" /></p>
+<h3 id="token">token</h3>
+<p>token 是语言中的单词，每个token都有一个类别。</p>
+<p>而每一个 token class
+则对应着一个字符串集合：比如Number，Keyword，Whitespace，Identifier等</p>
+<ul>
+<li><p><strong>token 就是一个二元组
+<code>(class,lexeme)</code></strong></p></li>
+<li><p><strong>词素（Lexeme）</strong> 是 token class
+的实例，比如上图中的 ‘z’，‘=’，‘1’</p></li>
+</ul>
+<p>因此我们词法分析的内容就是<strong>分类，识别</strong>得到一个 token
+流</p>
+<blockquote>
+<p>但是假设从左往右扫描，我们没办法一下子知道怎么分类或者切割更合适。比如
+<code>=</code> 和 <code>==</code> ，因此我们不得不<strong>需要一定的
+look ahead （往前多看）</strong>。</p>
+</blockquote>
+<h2 id="正则表达式regular-expression">正则表达式（Regular
+Expression）</h2>
+<p>为了解决问题，我们使用<strong>正则表达式</strong>，是一种简单但是强大的方法。</p>
+<p>需要引进一些定义</p>
+<ul>
+<li><p><strong>字母表<span
+class="math inline">\(\Sigma\)</span></strong>
+：一些符号的有限集合。比如
+<code>&#123;0,1&#125;</code>，<code>&#123;a,b,c&#125;</code></p></li>
+<li><p><strong>串（String）</strong>
+：使用字母表的符号组成的一个有限长度的串，比如 <code>aab</code>
+，注意有一个特殊的空串（没有使用任何字母）写为 <span
+class="math inline">\(\varepsilon\)</span></p></li>
+<li><p><strong>语言（Language）</strong>：串的集合。比如
+<code>&#123;01,10&#125;</code> 。</p>
+<p>注意两个特别的语言：</p>
+<p><span class="math inline">\(\{\varepsilon\}\)</span>
+代表集合中有一个元素（串），这个串为空串。</p>
+<p><span class="math inline">\(\phi\)</span>
+代表空集合，即集合中没有一个元素。</p></li>
+</ul>
+<p><strong>语言的运算</strong></p>
+<ul>
+<li><p><strong>并集（Union）</strong></p></li>
+<li><p><strong>连接（Concatenation）</strong>
+：两个语言（串的集合）中的<strong>串拼接</strong>类似于笛卡尔积，</p>
+<p>比如 <code>A=&#123;a,bc&#125;</code>，<code>B=&#123;df,g&#125;</code> ，那么
+<code>AB=&#123;adf,ag,bcdf,bcg&#125;</code></p></li>
+<li><p><strong>闭包（Kleene closure）</strong> ：<span
+class="math inline">\(L^*\)</span> <strong>将 <span
+class="math inline">\(L\)</span> 拼接 0 次或者多次</strong> 其中 <span
+class="math inline">\(L^0=\{\varepsilon\}\)</span> ，<span
+class="math inline">\(L^i=L^{i-1}L\)</span></p></li>
+<li><p><strong>正闭包</strong>：<span class="math inline">\(L^+\)</span>
+即 <span class="math inline">\(L^*-L^0\)</span></p></li>
+</ul>
+<p><strong>正则表达式</strong>：一种用来描述全部靠应用运算符在字母表得来的语言</p>
+<p>可以用来表示如重复等</p>
+<p>能够用正则表达式表达的语言叫做<strong>正则语言</strong></p>
+<blockquote>
+<p>怎么理解正则表达式和语言？</p>
+</blockquote>
+<p>正则表达式可以理解为是一种表达的方式，语言是字符串的集合</p>
+<p>而正则表达式就是为了表达这个集合（语言）</p>
+<h3 id="原子表达式atomic-res">原子表达式（Atomic REs）</h3>
+<p><strong>原子表达式</strong>是不能再被分割的正则表达式</p>
+<ul>
+<li><p><strong><span class="math inline">\(\varepsilon\)</span>
+代表空串集合</strong>，即 <code>&#123;""&#125;</code></p></li>
+<li><p><strong>单个字母代表这个字母的集合</strong>，如
+<code>'c'=&#123;"c"&#125;</code></p></li>
+<li><p><strong><span class="math inline">\(\phi\)</span>
+代表空集合</strong>，和 <span class="math inline">\(\varepsilon\)</span>
+不一样</p></li>
+</ul>
+<h3 id="组合表达式compound-res">组合表达式（Compound REs）</h3>
+<p>使用原子表达式组合起来得到的正则表达式</p>
+<ul>
+<li><p>正则表达式 <span class="math inline">\(r\)</span> ，它代表的语言
+<span class="math inline">\(L(r)\)</span> ，简洁表示 <span
+class="math inline">\((r)\)</span></p></li>
+<li><p><span class="math inline">\((r)|(s)\)</span> 代表并集 <span
+class="math inline">\(L(r) \cup L(s)\)</span></p></li>
+<li><p><span class="math inline">\((r)(s)\)</span> 代表连接操作 <span
+class="math inline">\(L(r)L(s)\)</span></p></li>
+<li><p><span class="math inline">\((r)^*\)</span> 代表闭包操作 <span
+class="math inline">\((L(r))^*\)</span></p></li>
+</ul>
+<p>在后面我们会删除这个括号，更加简洁。比如 <span
+class="math inline">\(a|b^*c\)</span></p>
+<p>这样的话，我们的<strong>正则表达式本来是为了表达这个语言（字符串的集合）</strong>
+，现在甚至可以理解成<strong>正则表达式就是代表一个字符串的集合</strong></p>
+<h3 id="运算符的优先级">运算符的优先级</h3>
+<p>由上到下优先级递减</p>
+<ul>
+<li><p>（A）</p></li>
+<li><p>A*</p></li>
+<li><p>AB</p></li>
+<li><p>A | B</p></li>
+</ul>
+<h3 id="常用的正则表达式表达">常用的正则表达式表达</h3>
+<ul>
+<li><p><span class="math inline">\(A+ \equiv AA^*\)</span></p></li>
+<li><p><span class="math inline">\(A?\equiv
+A|\varepsilon\)</span></p></li>
+<li><p><span class="math inline">\([a_1a_2...a_n]\equiv
+a_1|a_2|...|a_n\)</span></p></li>
+<li><p><span class="math inline">\([a-z]\equiv \
+&#39;a&#39;+&#39;b&#39;+&#39;c&#39;+...+&#39;z&#39;\)</span>
+这里代表一个字符串集合，里面有 a 到 z</p></li>
+<li><p>[^a-z] 表示除了 a-z 以外的所有字符</p></li>
+</ul>
+<p>至此，我们可以编写每个token下语素对应的正则表达式。比如：</p>
+<ul>
+<li><p><strong>Keyword</strong>：</p>
+<p><code>RE='if'|'else'|'then'|...</code></p></li>
+<li><p><strong>Numbers</strong>：</p>
+<p><code>digit=0|1|2|3|4|5|6|7|8|9</code></p>
+<p><code>integer=digit digit*</code></p></li>
+<li><p><strong>Identifier</strong>：</p>
+<p><code>letter=a|b|c|...</code></p>
+<p><code>RE=letter(letter|digit)*</code></p></li>
+</ul>
+<h3 id="使用正则表达式完成词法分析">使用正则表达式完成词法分析</h3>
+<ul>
+<li><p>为每个 token class 编写对应好的语素正则表达式</p></li>
+<li><p>创建一个正则表达式 <span
+class="math inline">\(R\)</span>，用来匹配所有的语素即 <span
+class="math inline">\(R=numbers+keywords+...\)</span></p></li>
+<li><p>检测输入中前面的字符，看看是否能<strong>匹配</strong>上</p></li>
+<li><p>假设匹配上了某一个表达式，那么<strong>去除</strong>前面的字符（得到一个
+token ），继续匹配</p></li>
+</ul>
+<blockquote>
+<p>假设前面既可以有 n 个字符匹配得到其中一个表达式，同时又有 m
+个字符匹配上另一个表达式，怎么选取？</p>
+</blockquote>
+<p><strong>最长匹配规则</strong></p>
+<blockquote>
+<p>同样的前缀匹配上了多个，怎么选，比如 if 既可以是关键字也可以是
+identifier？</p>
+</blockquote>
+<p>优先级规则，比如这里优先匹配关键字</p>
+<blockquote>
+<p>没有规则匹配中，怎么办？</p>
+</blockquote>
+<p>报错！</p>
+<p>至此，我们完成了如何用正则表达式来指定每个 token 的定义</p>
+<p>但是，我们还需要利用<strong>有穷自动机</strong>来完成一个
+<strong>token 识别器</strong></p>
+<hr />
+<h2 id="词法分析器的实现">词法分析器的实现</h2>
+<p>任务：预定义好的 RE（<strong>正则表达式</strong>）=&gt;
+FA（<strong>有穷自动机</strong>，finite automata）</p>
+<p>方法：</p>
+<ul>
+<li><p>使用现成的工具：Lex（C），Flex（C++），Jlex（Java）。编程人员只需要指定正则表达式来指定
+token，工具就会帮我们生成对应的代码来转换得到</p></li>
+<li><p>自己编写，更自由却更难！</p></li>
+</ul>
+<p>因此，<strong>正则表达式是定义，自动机是实现</strong>。</p>
+<p>我们将会用自动机来判断一个输入字符串将会被我们接受还是拒绝。</p>
+<p>这个自动机所代表的语言和我们规定的正则表达式所代表的语言是一致的。</p>
+<p><strong>状态图</strong>（用来表示自动机，方便我们查看）组成</p>
+<ul>
+<li><p>输入的字母表 <span class="math inline">\(\Sigma\)</span></p></li>
+<li><p>状态集合 <span class="math inline">\(S\)</span></p></li>
+<li><p>开始状态 <span class="math inline">\(n\in S\)</span></p></li>
+<li><p>接收状态 <span class="math inline">\(F\subset S\)</span></p></li>
+<li><p>状态转移 <span class="math inline">\(\delta：S_a \rightarrow
+S_b\)</span></p></li>
+</ul>
+<p><img src="状态图.png" /></p>
+<p>我们也将自动机分为两种：</p>
+<ul>
+<li><p><strong>确定性有穷自动机（DFA，Deterministic Finite
+Automata）</strong></p>
+<ul>
+<li><p>每个输入每个状态只有一个转移</p></li>
+<li><p>没有空转移 （<span class="math inline">\(\varepsilon\)</span>
+转移）</p></li>
+<li><p>在图中只有一条确定的路径</p></li>
+</ul></li>
+</ul>
+<p><img src="DFA.png" /></p>
+<ul>
+<li><p><strong>非确定性有穷自动机（NFA，Nondeterministic Finite
+Automata）</strong></p>
+<ul>
+<li><p>对于确定的输入和状态会有多个状态转移</p></li>
+<li><p>可能有 <span class="math inline">\(\varepsilon\)</span>
+转移</p></li>
+<li><p>可以选择其中之一的转移路径</p></li>
+</ul></li>
+</ul>
+<p><img src="NFA.png" /></p>
+<p><strong>整个的转移过程</strong></p>
+<p>正则表达式RE （-&gt; NFA） -&gt; DFA -&gt; 表格驱动的自动机</p>
+<p><strong>表驱动的优劣</strong></p>
+<ul>
+<li><p>优点：自动驱动</p></li>
+<li><p>缺点：内存消耗大，特别是很多状态不需要用上（没有状态转移）也需要存储</p></li>
+</ul>
+<p><img src="转移图和表驱动.png" /></p>
+<hr />
+<h2 id="re---nfa">RE -&gt; NFA</h2>
+<p>NFA可以有 <span class="math inline">\(\varepsilon\)</span>
+转移（空状态转移），即不需要读取任何输入就转移到下一个状态</p>
+<p><img src="空转移.png" /></p>
+<p><strong>使用 MYT算法 将 RE 转移成 NFA</strong></p>
+<p>输入：从字母表得到的RE</p>
+<p>输出：NFA，可以接受RE对应的语言</p>
+<h3 id="myt-算法">MYT 算法</h3>
+<ul>
+<li><p><strong>得到原子 RE（i 代表开始状态（initial），f
+代表接受状态（final））</strong></p>
+<ul>
+<li><p>空转移</p></li>
+<li><p>单字符转移</p></li>
+</ul></li>
+</ul>
+<p><img src="空表达式NFA.png" /></p>
+<p><img src="单字符表达式NFA.png" /></p>
+<ul>
+<li><p><strong>得到组合表达式</strong></p>
+<ul>
+<li><p>R1 | R2</p></li>
+<li><p>R1 R2</p></li>
+<li><p>R1*</p></li>
+</ul></li>
+</ul>
+<p><img src="组合表达式NFA.png" /></p>
+<p><img src="闭包表达式NFA.png" /></p>
+<h2 id="nfa---dfa">NFA -&gt; DFA</h2>
+<p>为了证明 NFA 和 DFA 等价，需要证明由 DFA 转换得到的 NFA
+将会接受相同的语言，反过来也一样。</p>
+<h3 id="子集构建">子集构建</h3>
+<p>对于某个输入序列，DFA只有一个状态，NFA
+可以走到很多个状态，<strong>因此一个 DFA 状态对应着多个 NFA
+状态</strong>。DFA 中的一个状态的对应的多个 NFA 状态之间可以用 <span
+class="math inline">\(\varepsilon\)</span>
+转移。我们就是用空转移来不断新增状态直至不能继续操作。</p>
+<h3 id="算法流程">算法流程</h3>
+<p>提前定义好几个概念</p>
+<ul>
+<li><p><span class="math inline">\(\varepsilon -closure(s)\)</span>
+：代表<strong>状态 s
+的空闭包</strong>，是一个集合，里面有所有可以<strong>由 NFA 的状态 s
+只进行空转移可以到达的全部状态</strong></p></li>
+<li><p><span class="math inline">\(\varepsilon
+-closure(T)\)</span>：所有 T 集合里面的状态 s 的 <span
+class="math inline">\(\varepsilon -closure(s)\)</span> 的并集</p></li>
+<li><p><span class="math inline">\(move(T,a)\)</span>：在 NFA 中集合 T
+的所有状态 s 接收到 a 动作将会到达的状态集合</p></li>
+<li><p>初始化 <span class="math inline">\(Dstates\)</span> 代表 DFA
+的状态集合，刚开始只有初始状态的空闭包 <span
+class="math inline">\(\varepsilon
+-closure(s_0)\)</span>，并且它未被标记</p></li>
+<li><p>开始循环，循环条件是 <span class="math inline">\(Dstates\)</span>
+还有未被标记的集合 <span class="math inline">\(T\)</span></p>
+<ul>
+<li><p>标记 <span class="math inline">\(T\)</span></p></li>
+<li><p>开始循环，遍历所有的输入 <span
+class="math inline">\(a\)</span></p>
+<ul>
+<li><p><span class="math inline">\(U:= \varepsilon
+-closure(move(T,a))\)</span> 即由当前的集合 <span
+class="math inline">\(T\)</span> 接收到动作 <span
+class="math inline">\(a\)</span> 后得到的空闭包</p></li>
+<li><p>如果 <span class="math inline">\(U\)</span> 不在 <span
+class="math inline">\(Dstates\)</span> 则把他加入，不标记</p></li>
+<li><p><span class="math inline">\(Dtran[T,a]:=U\)</span>
+状态转移添加</p></li>
+</ul></li>
+</ul></li>
+</ul>
+<p><strong>终止状态是那些至少包含一个 NFA 终止状态的 DFA
+状态</strong></p>
+<p>但是目前 DFA 还不是最小的</p>
+<h3 id="最小化">最小化</h3>
+<p>任一 DFA 可以被转换成它的<strong>最小状态等价 DFA</strong></p>
+<ul>
+<li><p>需要发现等价的状态</p></li>
+<li><p>将他们用一个状态表示</p></li>
+</ul>
+<p><strong>两个状态等价</strong></p>
+<ul>
+<li>对于任一输入 <span class="math inline">\(a\)</span>
+，它们都会转移到等价的状态</li>
+</ul>
+<h4 id="最小化算法">最小化算法</h4>
+<ul>
+<li><p>将 DFA 状态进行不停的分组直至无法进行</p></li>
+<li><p>那么每一个组都会被作为一个单独的状态</p></li>
+<li><p><strong>初始化状态分组</strong></p>
+<ul>
+<li><p>所有的终止态 <span class="math inline">\(\{F\}\)</span></p></li>
+<li><p>所有的非终止状态 <span
+class="math inline">\(\{S-F\}\)</span></p></li>
+</ul></li>
+<li><p><strong>循环直到不能改变为止</strong></p>
+<ul>
+<li>如果有同一组的状态相同的输入转移到了不同的状态组，那么必须分割</li>
+</ul></li>
+</ul>
+<p><strong>最后每一组都是单独一个 DFA 状态</strong></p>
+<h2 id="nfa---dfa-复杂度">NFA -&gt; DFA 复杂度</h2>
+<h3 id="空间复杂度">空间复杂度</h3>
+<ul>
+<li><p>NFA可以有无穷多状态</p></li>
+<li><p>假设 NFA 的状态数是 N ，那么 DFA 状态数量空间复杂度是 <span
+class="math inline">\(O(2^N)\)</span></p></li>
+</ul>
+<p>真实场景下，两者数量相近</p>
+<h3 id="时间复杂度">时间复杂度</h3>
+<p>对于一个字符串的处理</p>
+<ul>
+<li><p>DFA 是 <span class="math inline">\(O(|X|)\)</span></p></li>
+<li><p>NFA 是 <span class="math inline">\(O(|X|N^2)\)</span></p></li>
+</ul>
+<h2 id="实际实现">实际实现</h2>
+<p>更多都会选择使用 DFA 作为词法解析，空间换时间</p>
+<p><img src="Lex词法分析.png" /></p>
+<h2 id="如何匹配关键字">如何匹配关键字</h2>
+<ul>
+<li><p>使用正则表达式来匹配，注意优先级，会导致状态机臃肿</p></li>
+<li><p>使用同一个正则表达式来匹配关键字和标识符，但是使用特殊关键字表区分。更精简但是需要额外一个表</p></li>
+</ul>
+</article><div class="tag_share"><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/19/3-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/" title="3-语法分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">3-语法分析</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/19/1-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86%E6%80%BB%E8%A7%88/" title="1-编译原理总览"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">1-编译原理总览</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/19/1-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86%E6%80%BB%E8%A7%88/" title="1-编译原理总览"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">1-编译原理总览</div></div></a></div><div><a href="/2024/07/19/3-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/" title="3-语法分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">3-语法分析</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lihh</div><div class="author-info__description">专注一点，登峰造极</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">词法分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90lexical-analysis-%E6%88%96-tokenization"><span class="toc-number">1.1.</span> <span class="toc-text">词法分析（Lexical
+analysis 或 Tokenization）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#token"><span class="toc-number">1.1.1.</span> <span class="toc-text">token</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8Fregular-expression"><span class="toc-number">1.2.</span> <span class="toc-text">正则表达式（Regular
+Expression）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%AD%90%E8%A1%A8%E8%BE%BE%E5%BC%8Fatomic-res"><span class="toc-number">1.2.1.</span> <span class="toc-text">原子表达式（Atomic REs）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E8%A1%A8%E8%BE%BE%E5%BC%8Fcompound-res"><span class="toc-number">1.2.2.</span> <span class="toc-text">组合表达式（Compound REs）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">1.2.3.</span> <span class="toc-text">运算符的优先级</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%A1%A8%E8%BE%BE"><span class="toc-number">1.2.4.</span> <span class="toc-text">常用的正则表达式表达</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%AE%8C%E6%88%90%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="toc-number">1.2.5.</span> <span class="toc-text">使用正则表达式完成词法分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">词法分析器的实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#re---nfa"><span class="toc-number">1.4.</span> <span class="toc-text">RE -&gt; NFA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#myt-%E7%AE%97%E6%B3%95"><span class="toc-number">1.4.1.</span> <span class="toc-text">MYT 算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nfa---dfa"><span class="toc-number">1.5.</span> <span class="toc-text">NFA -&gt; DFA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E9%9B%86%E6%9E%84%E5%BB%BA"><span class="toc-number">1.5.1.</span> <span class="toc-text">子集构建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="toc-number">1.5.2.</span> <span class="toc-text">算法流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96"><span class="toc-number">1.5.3.</span> <span class="toc-text">最小化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96%E7%AE%97%E6%B3%95"><span class="toc-number">1.5.3.1.</span> <span class="toc-text">最小化算法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nfa---dfa-%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">1.6.</span> <span class="toc-text">NFA -&gt; DFA 复杂度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">1.6.1.</span> <span class="toc-text">空间复杂度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">1.6.2.</span> <span class="toc-text">时间复杂度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.7.</span> <span class="toc-text">实际实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%8C%B9%E9%85%8D%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-number">1.8.</span> <span class="toc-text">如何匹配关键字</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/19/3-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/" title="3-语法分析">3-语法分析</a><time datetime="2024-07-19T15:31:06.000Z" title="发表于 2024-07-19 23:31:06">2024-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/19/2-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/" title="2-词法分析">2-词法分析</a><time datetime="2024-07-19T15:02:08.000Z" title="发表于 2024-07-19 23:02:08">2024-07-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/19/1-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86%E6%80%BB%E8%A7%88/" title="1-编译原理总览">1-编译原理总览</a><time datetime="2024-07-19T14:51:41.000Z" title="发表于 2024-07-19 22:51:41">2024-07-19</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
