@@ -1,0 +1,331 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>6-代码优化 | Lihh7's Blog</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="代码优化 代码优化 IR -&gt; IR，正确性是前提 优化的种类  布局相关（Layout-related transformations） ，优化的是数据和代码内存放置的地方。目的是充分利用空间局部性。 代码相关（Code-related transformations），优化生成的代码，目标是执行最少数量代价高的指令。  强度削减（strength reduction）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="6-代码优化">
+<meta property="og:url" content="http://example.com/2024/07/20/6-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="Lihh7&#39;s Blog">
+<meta property="og:description" content="代码优化 代码优化 IR -&gt; IR，正确性是前提 优化的种类  布局相关（Layout-related transformations） ，优化的是数据和代码内存放置的地方。目的是充分利用空间局部性。 代码相关（Code-related transformations），优化生成的代码，目标是执行最少数量代价高的指令。  强度削减（strength reduction）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-07-20T03:26:36.000Z">
+<meta property="article:modified_time" content="2024-07-20T03:32:57.106Z">
+<meta property="article:author" content="Lihh">
+<meta property="article:tag" content="编译原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/07/20/6-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '6-代码优化',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-07-20 11:32:57'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh7's Blog"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">6-代码优化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-20T03:26:36.000Z" title="发表于 2024-07-20 11:26:36">2024-07-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-20T03:32:57.106Z" title="更新于 2024-07-20 11:32:57">2024-07-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="6-代码优化"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="代码优化">代码优化</h1>
+<h2 id="代码优化-1">代码优化</h2>
+<p>IR -&gt; IR，正确性是前提</p>
+<p>优化的种类</p>
+<ul>
+<li><p><strong>布局相关（Layout-related transformations）</strong>
+，优化的是数据和代码内存放置的地方。目的是充分利用<strong>空间局部性</strong>。</p></li>
+<li><p><strong>代码相关（Code-related
+transformations）</strong>，优化生成的代码，目标是执行最少数量代价高的指令。</p>
+<ul>
+<li><p><strong>强度削减（strength reduction）</strong>，比如 <span
+class="math inline">\(A=2*a\)</span> 改成 <span
+class="math inline">\(A=a&lt;&lt;1\)</span></p></li>
+<li><p><strong>废弃代码移除（dead code elimination）</strong></p></li>
+<li><p><strong>代码调度（code
+scheduling）</strong>，更容易并行化</p></li>
+<li><p><strong>数据预取（data prefetching）</strong></p></li>
+</ul></li>
+</ul>
+<p><img src="代码优化总览.png" /></p>
+<h2 id="指令调度instruction-scheduling">指令调度（Instruction
+Scheduling）</h2>
+<p>调度：寻找无依赖性的指令</p>
+<ul>
+<li><p>静态（Static）：编译时由编译器完成</p></li>
+<li><p>动态（Dynamic）：运行时由 CPU 完成
+要寻找依赖无关的指令重叠计算，有依赖的要隔开若干个时钟周期
+实行调度的能力依赖于</p></li>
+<li><p>程序特性</p></li>
+<li><p>硬件特性</p></li>
+</ul>
+<p><img src="指令调度.png" /></p>
+<h2 id="循环展开loop-unrolling">循环展开（Loop Unrolling）</h2>
+<p><strong>复制循环体多次，然后调整循环代码</strong></p>
+<ul>
+<li><p>增加有效指令数</p></li>
+<li><p>消除分支，共同调度</p></li>
+</ul>
+<p><strong>限制</strong></p>
+<ul>
+<li><p>每次展开减少的时间少了</p></li>
+<li><p>代码尺寸变大，可能对代码缓存影响，带来寄存器压力</p></li>
+<li><p>编译器本身的限制</p></li>
+</ul>
+<h2 id="控制流分析control-flow-analysis">控制流分析（Control-Flow
+Analysis）</h2>
+<p><strong>控制流图（Control-Flow Graph,
+CFG）表示出程序运行可能经过的路径</strong>，我们需要提前构造出基本块才能得到这个图。</p>
+<h3 id="基本块basic-block">基本块（Basic Block）</h3>
+<p>基本块进出口唯一，第一条进入，最后一条出。</p>
+<p>基本块不能再划分，要么全运行，要么就不执行这个基本块。</p>
+<p><strong>本地优化受到基本块作用域的限制，全局优化跨越基本块</strong>。</p>
+<h3 id="控制流图control-flow-graph">控制流图（Control-Flow Graph）</h3>
+<ul>
+<li><p>节点代表基本块</p></li>
+<li><p>边代表基本块之间的执行流</p></li>
+<li><p>控制语句引入了控制流的边</p></li>
+</ul>
+<p><img src="控制流图.png" /></p>
+<h3 id="构造-cfg">构造 CFG</h3>
+<ul>
+<li><p>分解为基本块，<strong>基本块有 leader 和在下一个 leader
+前紧跟着的指令</strong>。需要分辨出指令的 <strong>leader</strong></p>
+<ul>
+<li><p>首条指令</p></li>
+<li><p>跳转的目标</p></li>
+<li><p>紧跟跳转的指令</p></li>
+</ul></li>
+<li><p>连接基本块，跳转，顺序执行</p></li>
+</ul>
+<p><img src="构造CFG.png" /></p>
+<h2 id="局部和全局优化">局部和全局优化</h2>
+<ul>
+<li><p><strong>局部优化（Local
+optimizations）</strong>：只在一个基本块中优化</p>
+<ul>
+<li><p>常量折叠</p></li>
+<li><p>公共子表达式删除</p></li>
+</ul></li>
+<li><p><strong>全局优化（Global
+optimizations）</strong>：跨越基本块</p></li>
+</ul>
+<h3 id="局部优化">局部优化</h3>
+<p><strong>公共子表达式删除</strong>：避免重复计算</p>
+<p><strong>死代码删除（Dead Code
+Elimination）</strong>：结果从不使用的代码删除</p>
+<h4 id="基本块的-dag">基本块的 DAG</h4>
+<p>有向无环图（DAG，directed acyclic graph）</p>
+<p><strong>构造</strong></p>
+<ul>
+<li><p>为变量初始值创建节点，叶子</p></li>
+<li><p>为声明语句创建节点</p>
+<ul>
+<li>用运算符标注节点</li>
+</ul></li>
+<li><p>某些为输出节点</p></li>
+</ul>
+<p><img src="基本块的DAG.png" /></p>
+<h4 id="代数恒等式">代数恒等式</h4>
+<p>使用数学规则</p>
+<p><span class="math inline">\(a*1=a\)</span>，<span
+class="math inline">\(a*0=0\)</span>，<span
+class="math inline">\(b\&amp;true=b\)</span></p>
+<p><span class="math inline">\((a+b)+c=a+(b+c),a+b=b+a\)</span></p>
+<h4 id="强度削减">强度削减</h4>
+<p>用花销更小的运算来代替花销大的计算</p>
+<ul>
+<li><p><span class="math inline">\(x=y/8\)</span> -&gt; <span
+class="math inline">\(x=y&gt;&gt;3\)</span></p></li>
+<li><p><span class="math inline">\(y=y*8\)</span> -&gt; <span
+class="math inline">\(x=y&lt;&lt;8\)</span></p></li>
+<li><p><span class="math inline">\(x^2\)</span> -&gt; <span
+class="math inline">\(x*x\)</span></p></li>
+<li><p><span class="math inline">\(2*x\)</span> -&gt; <span
+class="math inline">\(x+x\)</span></p></li>
+</ul>
+<h4 id="常量折叠">常量折叠</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LEN 100 </span></span><br><span class="line">x = <span class="number">2</span> * LEN; </span><br><span class="line"><span class="keyword">if</span> (LEN &lt; <span class="number">0</span>) print(“error”);</span><br></pre></td></tr></table></figure>
+<p>改成</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="number">200</span>; </span><br><span class="line"><span class="keyword">if</span> (<span class="literal">false</span>) print(“error”);</span><br></pre></td></tr></table></figure>
+<h4 id="常量传播">常量传播</h4>
+<p><strong>局部常量传播 LCP</strong>（Local Constant Propagation）</p>
+<p><img src="常量传播.png" /></p>
+<p>有一些优化既有局部优化也有全局版本</p>
+<p><strong>全局常量传播（Global Constant
+Propagation，GCP）</strong>，更强大但是更复杂</p>
+<p><img src="全局变量传播.png" /></p>
+<h3 id="全局优化">全局优化</h3>
+<p><strong>将优化扩展到数据流</strong>而不是一个基本块</p>
+<ul>
+<li><p>沿着所有路径，上一条赋值需要是 <code>X=C</code></p></li>
+<li><p><strong>哪怕只有一个路径不是，优化都必须停止</strong></p></li>
+</ul>
+<p><img src="全局优化.png" /></p>
+<h4 id="全局常量传播">全局常量传播</h4>
+<p>全局优化必须保守来保证正确性，比如考虑数据流（控制流）</p>
+<p><img src="全局常量传播.png" /></p>
+<p><img src="移除死代码.png" /></p>
+</article><div class="tag_share"><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/20/7-%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="7-目标代码生成"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">7-目标代码生成</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/20/5-%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="5-中间代码生成"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">5-中间代码生成</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/19/1-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86%E6%80%BB%E8%A7%88/" title="1-编译原理总览"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">1-编译原理总览</div></div></a></div><div><a href="/2024/07/19/2-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/" title="2-词法分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">2-词法分析</div></div></a></div><div><a href="/2024/07/19/4-%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90/" title="4-语义分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">4-语义分析</div></div></a></div><div><a href="/2024/07/19/3-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/" title="3-语法分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-19</div><div class="title">3-语法分析</div></div></a></div><div><a href="/2024/07/20/5-%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="5-中间代码生成"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-20</div><div class="title">5-中间代码生成</div></div></a></div><div><a href="/2024/07/20/7-%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="7-目标代码生成"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-20</div><div class="title">7-目标代码生成</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lihh</div><div class="author-info__description">专注一点，登峰造极</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="toc-number">1.</span> <span class="toc-text">代码优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-1"><span class="toc-number">1.1.</span> <span class="toc-text">代码优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E4%BB%A4%E8%B0%83%E5%BA%A6instruction-scheduling"><span class="toc-number">1.2.</span> <span class="toc-text">指令调度（Instruction
+Scheduling）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80loop-unrolling"><span class="toc-number">1.3.</span> <span class="toc-text">循环展开（Loop Unrolling）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%E5%88%86%E6%9E%90control-flow-analysis"><span class="toc-number">1.4.</span> <span class="toc-text">控制流分析（Control-Flow
+Analysis）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E5%9D%97basic-block"><span class="toc-number">1.4.1.</span> <span class="toc-text">基本块（Basic Block）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%E5%9B%BEcontrol-flow-graph"><span class="toc-number">1.4.2.</span> <span class="toc-text">控制流图（Control-Flow Graph）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0-cfg"><span class="toc-number">1.4.3.</span> <span class="toc-text">构造 CFG</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E5%92%8C%E5%85%A8%E5%B1%80%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.</span> <span class="toc-text">局部和全局优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.1.</span> <span class="toc-text">局部优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E5%9D%97%E7%9A%84-dag"><span class="toc-number">1.5.1.1.</span> <span class="toc-text">基本块的 DAG</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E6%95%B0%E6%81%92%E7%AD%89%E5%BC%8F"><span class="toc-number">1.5.1.2.</span> <span class="toc-text">代数恒等式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%BA%E5%BA%A6%E5%89%8A%E5%87%8F"><span class="toc-number">1.5.1.3.</span> <span class="toc-text">强度削减</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E6%8A%98%E5%8F%A0"><span class="toc-number">1.5.1.4.</span> <span class="toc-text">常量折叠</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E9%87%8F%E4%BC%A0%E6%92%AD"><span class="toc-number">1.5.1.5.</span> <span class="toc-text">常量传播</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E4%BC%98%E5%8C%96"><span class="toc-number">1.5.2.</span> <span class="toc-text">全局优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%B8%B8%E9%87%8F%E4%BC%A0%E6%92%AD"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">全局常量传播</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/20/8-%E8%AF%BE%E5%A4%96%E7%9F%A5%E8%AF%86/" title="8-课外知识">8-课外知识</a><time datetime="2024-07-20T03:40:14.000Z" title="发表于 2024-07-20 11:40:14">2024-07-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/20/7-%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="7-目标代码生成">7-目标代码生成</a><time datetime="2024-07-20T03:26:55.000Z" title="发表于 2024-07-20 11:26:55">2024-07-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/20/6-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96/" title="6-代码优化">6-代码优化</a><time datetime="2024-07-20T03:26:36.000Z" title="发表于 2024-07-20 11:26:36">2024-07-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/20/5-%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90/" title="5-中间代码生成">5-中间代码生成</a><time datetime="2024-07-20T03:19:31.000Z" title="发表于 2024-07-20 11:19:31">2024-07-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/19/4-%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90/" title="4-语义分析">4-语义分析</a><time datetime="2024-07-19T15:49:08.000Z" title="发表于 2024-07-19 23:49:08">2024-07-19</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
