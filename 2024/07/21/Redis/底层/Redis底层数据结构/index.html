@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Redis底层数据结构 | Lihh7's Blog</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Redis 底层数据结构 总览  SDS（动态扩容且常量获取长度的字符串） IntSet（有序整数Set，兼备压缩空间（统一编码）和动态扩容） Dict （双哈希表组成的字典，动态扩容收缩，渐进式rehash） ZipList（连续内存的链表，节省了指针压缩内存但是存在连锁更新隐患） QuickList（以ZipList节点的双端链表） SkipList（跳表）   SDS（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis底层数据结构">
+<meta property="og:url" content="http://example.com/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="Lihh7&#39;s Blog">
+<meta property="og:description" content="Redis 底层数据结构 总览  SDS（动态扩容且常量获取长度的字符串） IntSet（有序整数Set，兼备压缩空间（统一编码）和动态扩容） Dict （双哈希表组成的字典，动态扩容收缩，渐进式rehash） ZipList（连续内存的链表，节省了指针压缩内存但是存在连锁更新隐患） QuickList（以ZipList节点的双端链表） SkipList（跳表）   SDS（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-07-21T08:37:24.000Z">
+<meta property="article:modified_time" content="2024-07-21T08:47:32.805Z">
+<meta property="article:author" content="Lihh">
+<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="底层数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis底层数据结构',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-07-21 16:47:32'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh7's Blog"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis底层数据结构</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-21T08:37:24.000Z" title="发表于 2024-07-21 16:37:24">2024-07-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-21T08:47:32.805Z" title="更新于 2024-07-21 16:47:32">2024-07-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis底层数据结构"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="redis-底层数据结构">Redis 底层数据结构</h1>
+<h2 id="总览">总览</h2>
+<ol type="1">
+<li><p>SDS（动态扩容且常量获取长度的字符串）</p></li>
+<li><p>IntSet（有序整数Set，兼备压缩空间（统一编码）和动态扩容）</p></li>
+<li><p>Dict （双哈希表组成的字典，动态扩容收缩，渐进式rehash）</p></li>
+<li><p>ZipList（连续内存的链表，节省了指针压缩内存但是存在连锁更新隐患）</p></li>
+<li><p>QuickList（以ZipList节点的双端链表）</p></li>
+<li><p>SkipList（跳表）</p></li>
+</ol>
+<hr />
+<h2
+id="sds动态扩容且常量获取长度的字符串">SDS（动态扩容且常量获取长度的字符串）</h2>
+<p>redis中Key是字符串，value往往是字符串或者字符串的集合</p>
+<p>但是Redis没有用<strong>C语言的字符串</strong>，因为它有缺陷</p>
+<ul>
+<li><p><strong>读取长度需要遍历</strong>，需要读到
+<code>\0</code></p></li>
+<li><p>非二进制安全，如果中间有 <code>\0</code> 会被截断</p></li>
+<li><p>不可修改，保存在常量池</p></li>
+</ul>
+<p><strong>SDS（simple dynamic String） ，简单动态字符串</strong></p>
+<p>比如 <code>set name huge</code></p>
+<p>底层会有两个SDS</p>
+<p>本质上是一个结构体，里面成员变量</p>
+<p>有
+<code>sdshdr8</code>，<code>sdshdr16</code>，还有32，64，甚至还有5，已被弃用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//buf已经保存的字符串字节数，不包含结束标识</span></span><br><span class="line"><span class="type">uint8_t</span> len;</span><br><span class="line"><span class="comment">//buf占据的总字节数，不包含结束标识</span></span><br><span class="line"><span class="type">uint8_t</span> alloc;</span><br><span class="line"><span class="comment">//不同SDS的头类型，用来控制SDS的头大小</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">char</span> flags;</span><br><span class="line"><span class="type">char</span> buf[];</span><br></pre></td></tr></table></figure>
+<p><img src="SDS结构.png" /></p>
+<p>还可以<strong>动态扩容</strong></p>
+<ul>
+<li><p>如果小于1M，新空间为扩展后字符串的长度的两倍+1</p></li>
+<li><p>如果新字符串大于1M，则新空间为扩展后字符串长度+1M+1</p></li>
+</ul>
+<p>这个加一体现在后面的 <code>\0</code></p>
+<p><strong>内存预分配</strong>：内存分配是Linux内核的事情，需要耗时，所以预分配，减少内存分配次数。</p>
+<p>总结：</p>
+<ol type="1">
+<li><p>获取长度复杂度为O（1）</p></li>
+<li><p>动态扩容</p></li>
+<li><p>减少分配内存次数</p></li>
+<li><p>二进制安全</p></li>
+</ol>
+<hr />
+<h2
+id="intset有序整数set兼备压缩空间和动态扩容">IntSet（有序整数Set，兼备压缩空间和动态扩容）</h2>
+<blockquote>
+<p>IntSet 对比链表，数组的优势？</p>
+</blockquote>
+<p>对比链表，指针乱飞，占用内存，造成碎片，IntSet连续空间；</p>
+<p>对比数组，固定死长度，没办法动态扩容。</p>
+<p>IntSet是 Redis 中 set 集合的一种实现方式，基于整数数组实现</p>
+<ul>
+<li><p><strong>长度可变</strong></p></li>
+<li><p><strong>唯一</strong></p></li>
+<li><p><strong>有序</strong></p></li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">intset</span>&#123;</span></span><br><span class="line">	<span class="comment">//编码方式，支持存放16位，32位，64位</span></span><br><span class="line">	<span class="type">uint32_t</span> encoding;</span><br><span class="line">	<span class="comment">//个数</span></span><br><span class="line">	<span class="type">uint32_t</span> length;</span><br><span class="line">	<span class="type">int8_t</span> contents[];</span><br><span class="line">&#125; intset;</span><br></pre></td></tr></table></figure>
+<p><strong>固定编码格式，到时候寻址方便</strong></p>
+<p><img src="intset结构.png" /></p>
+<h3 id="intset-升级">IntSet 升级</h3>
+<p>如果超过了已经编码的格式，那么会升级，增加编码大小</p>
+<p>升级流程：</p>
+<ol type="1">
+<li><p><strong>扩容数组</strong></p></li>
+<li><p><strong>倒序拷贝</strong>到正确位置</p></li>
+<li><p><strong>新增</strong>元素到末尾</p></li>
+<li><p>改变 <code>encoding</code></p></li>
+</ol>
+<h3 id="新增">新增</h3>
+<ol type="1">
+<li><p>判断是否需要升级，需要就<strong>升级并插入</strong></p>
+<ol type="1">
+<li><p>获取编码，改变编码</p></li>
+<li><p>重置数组大小</p></li>
+<li><p>倒序插入（需要根据大小判断角标）</p></li>
+<li><p>插入新元素</p></li>
+</ol></li>
+<li><p>如果没有超出</p>
+<ol type="1">
+<li><p><strong>二分查找</strong>看是否重复</p></li>
+<li><p>扩容</p></li>
+<li><p>移动数组并插入元素</p></li>
+</ol></li>
+</ol>
+<hr />
+<h2 id="dict-双哈希表组成的字典动态扩容收缩渐进式rehash">Dict
+（双哈希表组成的字典，动态扩容收缩，渐进式rehash）</h2>
+<p>三部分组成：</p>
+<ul>
+<li><p><strong>哈希表</strong>（DictHashTable）</p></li>
+<li><p><strong>哈希节点</strong>（DictEntry）</p></li>
+<li><p><strong>字典</strong>（Dict）</p></li>
+</ul>
+<p>前面两部分如下：</p>
+<p>一个简单的哈希表，存了多个节点</p>
+<p>处理哈希冲突使用<strong>链表</strong>，链表使用<strong>头插法</strong>避免遍历插入</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//哈希表</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictht</span>&#123;</span></span><br><span class="line">	<span class="comment">//entry数组</span></span><br><span class="line">	<span class="comment">//数组中保存的是指向 entry 的指针</span></span><br><span class="line">	dictEntry **table;</span><br><span class="line">	<span class="comment">//哈希表大小</span></span><br><span class="line">	<span class="comment">//这里的size一定会是2^n</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> size;</span><br><span class="line">	<span class="comment">//哈希表掩码，总等于size-1</span></span><br><span class="line">	<span class="comment">//&amp;等于取余</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> sizemask;</span><br><span class="line">	<span class="comment">//entry个数，因为哈希特性，有可能多过size</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> used;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Entry</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span>&#123;</span></span><br><span class="line">	<span class="comment">//键</span></span><br><span class="line">	<span class="type">void</span> *key;</span><br><span class="line">	<span class="comment">//值，多种可能</span></span><br><span class="line">	<span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">		<span class="type">void</span> * val;</span><br><span class="line">		<span class="type">uint64_t</span> u64;</span><br><span class="line">		<span class="type">int64_t</span> s64;</span><br><span class="line">		<span class="type">double</span> d;</span><br><span class="line">	&#125; v;</span><br><span class="line">	<span class="comment">//下一个Entry的指针</span></span><br><span class="line">	<span class="comment">//处理哈希冲突，用链表</span></span><br><span class="line">	<span class="comment">//使用头插法，方便插入，避免遍历</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure>
+<p>最后的dict</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dict</span>&#123;</span></span><br><span class="line">	<span class="comment">//内置不同的hash函数</span></span><br><span class="line">	dictType *type;</span><br><span class="line">	<span class="comment">//私有数据，做特殊hash运算使用</span></span><br><span class="line">	<span class="type">void</span> *privdata;</span><br><span class="line">	<span class="comment">//两个dictht ,其中一个当前数据，另一个一般是空</span></span><br><span class="line">	<span class="comment">//用来rehash</span></span><br><span class="line">	dictht ht[<span class="number">2</span>];</span><br><span class="line">	<span class="comment">//rehash的进度，-1代表未进行</span></span><br><span class="line">	<span class="type">long</span> rehashidx;</span><br><span class="line">	<span class="comment">//rehash是否暂停，1代表暂停，0代表继续</span></span><br><span class="line">	<span class="type">int16_t</span> pauserehash;</span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure>
+<p><img src="dict结构.png" /></p>
+<h3 id="dict-的扩容">Dict 的扩容</h3>
+<p>链表导致元素较多的时候，必然导致哈希冲突增长，链表过长，查询效率变低</p>
+<p>Dict
+每次新增检查<strong>负载因子（LoadFactor=used/size）</strong>，满足则会触发<strong>哈希表扩容</strong>：</p>
+<ul>
+<li><p>如果<strong>大于1，并且服务器没有执行 <code>BGSAVE</code> 和
+<code>BGREWRITEAOF</code>
+等后台进程</strong>（这些后台进程需要CPU使用，IO使用）；</p></li>
+<li><p>如果<strong>大于5</strong>；</p></li>
+</ul>
+<p>扩容的大小为大于等于used+1的2^n</p>
+<h3 id="dict-的收缩">Dict 的收缩</h3>
+<p>每次删除都会检查负载因子和负载（至少要大于初始的4才收缩），小于0.1就做哈希表收缩</p>
+<p>扩容的大小为大于等于 used 的2^n</p>
+<h3 id="rehash">Rehash</h3>
+<p>无论扩容还是收缩，因为size和sizemask变了，都需要rehash</p>
+<p><strong>渐进式hash</strong></p>
+<ol type="1">
+<li><p>计算<strong>新的size</strong></p></li>
+<li><p><strong>申请空间</strong>，创建dictht，赋值给
+<code>ht[1]</code></p></li>
+<li><p>设置 <code>rehashidx=0</code> 代表正在
+<code>rehash</code></p></li>
+<li><p>每次执行新增，查询，删除，修改操作，都<strong>检查一下
+<code>rehashidx</code></strong> 是否大于
+<code>-1</code>，如果是的话那么就将 <code>ht[0].table[rehashidx]</code>
+的 <code>entry</code> 链表 <code>rehash</code> 到
+<code>dict.ht[1]</code> 当中，然后
+<code>rehashidx++</code>。直至所有都完成。</p>
+<p><strong>这里的删改查两边找，新增就放到
+<code>ht[1]</code></strong>，导致 <code>ht[0]</code>
+至少不加，最终为空</p></li>
+<li><p>将 <code>ht[1]</code> 赋值给 <code>ht[0]</code></p></li>
+<li><p>给 <code>ht[1]</code> 赋值给空哈希表，释放内存</p></li>
+</ol>
+<hr />
+<h2 id="ziplist连续内存的链表">ZipList（连续内存的链表）</h2>
+<p>Dict
+因为使用了大量的指针，速度快了，但是内存浪费（<strong>指针占内存，内存也不连续有碎片</strong>）</p>
+<p>ZipList 是一种特殊的
+“双端链表”，由一系列特殊编码的<strong>连续内存块</strong>组成，可以在任意一端进行压入/弹出操作，并且操作复杂度为
+O（1）</p>
+<p><strong>这里的 <code>entry</code>
+的内存是不固定的，为了节省内存</strong></p>
+<p><img src="ZipList结构.png" /></p>
+<p><img src="ZipList属性字节数量.png" /></p>
+<h3 id="ziplistentry">ZipListEntry</h3>
+<p><img src="ZipListEntry结构.png" /></p>
+<p>分为三部分：</p>
+<ul>
+<li><p><code>previous_entry_length</code>
+<strong>前一个节点的长度</strong>，占一个或者5个字节。</p>
+<ul>
+<li><p>如果前一个内存小于 254 字节，则采用1个字节来保存</p></li>
+<li><p>如果大于254字节，则采用5个字节保存，并且第一个字节为
+<code>0xfe</code> ，后面四个才是真实的长度</p></li>
+</ul></li>
+<li><p><code>encoding</code> <strong>编码属性</strong>，记录
+<code>content</code>
+的<strong>数据类型</strong>（字符串或者整数）以及<strong>长度</strong>。占用1个，2个或者5个</p></li>
+<li><p><code>contents</code> 负责记录<strong>节点数据</strong></p></li>
+</ul>
+<p>这里节点的大小会影响 <code>previous_entry_length</code> 和
+<code>encoding</code> 的大小</p>
+<p><strong>ZipList 存储长度使用小端字节序</strong></p>
+<h4 id="encoding-编码">Encoding 编码</h4>
+<p><strong>字符串</strong>使用 <code>00</code> 或者 <code>01</code> 或者
+<code>10</code> 开头</p>
+<p><img src="ZipList字符串结构.png" /></p>
+<p>整数使用 <code>11</code> 开头的 <code>encoding</code>
+，并且因为整数的长度通常比较固定，只有几种，只需要一个字节编码识别即可，无需记录长度。还能压缩到极致，把
+<code>content</code> 都节省了（0-12）</p>
+<p><img src="ZipList整数结构.png" /></p>
+<p>ZipList 的优点是<strong>节省内存</strong>，压缩到极致。</p>
+<p>但是<strong>遍历慢</strong>，毕竟（近似）链表，需要从前往后根据长度推算到某个节点。</p>
+<h3 id="连锁更新问题">连锁更新问题</h3>
+<p>首先 <code>entry</code> 里面每个都含有前一个节点的长度
+<code>previous_entry_entry</code>
+，并且它的大小会根据前一个节点的大小受到影响。</p>
+<p>如果一连串 <code>ZipListEntry</code> 都在 <code>254</code>
+节点（<strong>边缘试探</strong>），那么它们被记录长度的这一项还只是一个字节，但是<strong>这时候插入一个大节点在前面，将会导致连锁更新</strong>。</p>
+<p>其中会涉及很多内存扩容，申请空间，迁移。</p>
+<p>这个问题还没有解决，因为概率低。</p>
+<p>新的数据结构（紧凑列表）</p>
+<hr />
+<h2
+id="quicklist以ziplist节点的双端链表">QuickList（以ZipList节点的双端链表）</h2>
+<p>ZipList 压缩列表，连续内存。</p>
+<p><strong>但是连续内存不能太大，往往不能加入过多数据。如果空间过大，内存占用多，申请效率低。</strong></p>
+<p>为了解决这个问题，分片思想：多个 ZipList</p>
+<p>为了统一管理，引入 QuickList
+，即创建<strong>双端链表</strong>，特殊的是<strong>节点却是一个
+ZipList</strong></p>
+<p><img src="QuickList结构.png" /></p>
+<h3 id="压缩内存配置">压缩内存配置</h3>
+<p>配置配置文件 或者 使用 <code>config</code> 命令</p>
+<p>限制 QuckList 每个 ZipList 的 entry 过多</p>
+<ol type="1">
+<li><p><strong><code>list-max-ziplist-size</code></strong> 正数代表
+ZipList 允许的 <code>entry</code>
+个数最大值，如果是负数则代表最大内存大小。默认是
+<code>-2</code></p></li>
+<li><p><code>list-compress-depth</code> 压缩 ZipList ，这个数量代表
+QuickList 首尾不压缩的数量。因为一般我们访问更多首尾节点</p></li>
+</ol>
+<h3 id="代码及结构">代码及结构</h3>
+<p>quicklist的定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">quicklist</span>&#123;</span></span><br><span class="line">	<span class="comment">//头尾节点</span></span><br><span class="line">	quicklistNode *head;</span><br><span class="line">	quicklistNode *tail;</span><br><span class="line">	<span class="comment">//所有 ziplist 的 entry 数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> count;</span><br><span class="line">	<span class="comment">// ziplist 的总数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> len;</span><br><span class="line">	<span class="comment">//ziplist的 entry 上限，默认 -2（内存限制）</span></span><br><span class="line">	<span class="type">int</span> fill: QL_FILL_BITS;</span><br><span class="line">	<span class="comment">//首尾不压缩的节点数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> compress: QL_COMP_BITS;</span><br><span class="line">	<span class="comment">//内存重分配时的书签数量和数组，一般用不到</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> bookmark_count :QL_BM_BITS;</span><br><span class="line">	quicklistBookmark bookmarks[];</span><br><span class="line">&#125; quicklist;</span><br></pre></td></tr></table></figure>
+<p>quicklistNode 的定义（主体放一个ziplist）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">qucklistNode</span>&#123;</span></span><br><span class="line">	<span class="comment">//前后节点指针</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">quicklistNode</span> *<span class="title">prev</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">quicklistNode</span> *<span class="title">next</span>;</span></span><br><span class="line">	<span class="comment">//当前 ziplist 的指针</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> *zl;</span><br><span class="line">	<span class="comment">//当前节点的 zipList 的字节大小</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> sz;</span><br><span class="line">	<span class="comment">//当前节点的ZipList的entry个数</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> count: <span class="number">16</span>;</span><br><span class="line">	<span class="comment">//编码方式：1：Ziplist 2:lzf压缩模式</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> encoding:<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//数据容器类型（预留），1：其他，2：Ziplist</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> container :<span class="number">2</span>;</span><br><span class="line">	<span class="comment">//是否被解压缩，1被解压，将来要重新压缩</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> recompress :<span class="number">1</span>;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="QuickList整体结构.png" /></p>
+<hr />
+<h2 id="skiplist跳表">SkipList（跳表）</h2>
+<p>ziplist 和 quicklist 都有随机访问需要遍历的缺点</p>
+<p>SkipList
+（跳表）首先是<strong>双向链表</strong>，但是与传统链表有区别：</p>
+<ul>
+<li><p><strong>升序</strong>排列存储</p></li>
+<li><p><strong>节点可能包含多个指针，指针跨度不同</strong></p></li>
+</ul>
+<p>优点：</p>
+<p><strong>查询性能和红黑树接近，可以范围查询。实现简单</strong></p>
+<p>最多允许 32 级指针，随机层数。</p>
+<p><strong>层级是1到32的随机数</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//整个跳表</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplist</span>&#123;</span></span><br><span class="line">	<span class="comment">//头尾节点指针</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskipllistNode</span> *<span class="title">header</span>,*<span class="title">tail</span>;</span></span><br><span class="line">	<span class="comment">//节点数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> length;</span><br><span class="line">	<span class="comment">//最大索引层级，默认为1</span></span><br><span class="line">	<span class="type">int</span> level;</span><br><span class="line">&#125; zskiplist;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span>&#123;</span></span><br><span class="line">	<span class="comment">//节点存储的值，一个字符串sds</span></span><br><span class="line">	sds ele;</span><br><span class="line">	<span class="comment">//节点的分数，排序，查找使用</span></span><br><span class="line">	<span class="type">double</span> score;</span><br><span class="line">	<span class="comment">//前一个节点的指针</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">backward</span>;</span></span><br><span class="line">	<span class="comment">//多级索引数组</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistlevel</span>&#123;</span></span><br><span class="line">		<span class="comment">//指向下一个节点的指针</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">fordward</span>;</span></span><br><span class="line">		<span class="comment">//索引跨度</span></span><br><span class="line">		<span class="type">unsigned</span> <span class="type">long</span> span;</span><br><span class="line">	&#125; level[];</span><br><span class="line">&#125; zskiplistNode;</span><br></pre></td></tr></table></figure>
+<p><img src="SkipList跳表数据结构.png" /></p>
+</article><div class="tag_share"><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%B8%B8%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/" title="Redis常用的数据类型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Redis常用的数据类型</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" title="10-垃圾回收器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">10-垃圾回收器</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%B8%B8%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/" title="Redis常用的数据类型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">Redis常用的数据类型</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lihh</div><div class="author-info__description">专注一点，登峰造极</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lihh7"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/Lihh7" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#redis-%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">Redis 底层数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E8%A7%88"><span class="toc-number">1.1.</span> <span class="toc-text">总览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sds%E5%8A%A8%E6%80%81%E6%89%A9%E5%AE%B9%E4%B8%94%E5%B8%B8%E9%87%8F%E8%8E%B7%E5%8F%96%E9%95%BF%E5%BA%A6%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.2.</span> <span class="toc-text">SDS（动态扩容且常量获取长度的字符串）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#intset%E6%9C%89%E5%BA%8F%E6%95%B4%E6%95%B0set%E5%85%BC%E5%A4%87%E5%8E%8B%E7%BC%A9%E7%A9%BA%E9%97%B4%E5%92%8C%E5%8A%A8%E6%80%81%E6%89%A9%E5%AE%B9"><span class="toc-number">1.3.</span> <span class="toc-text">IntSet（有序整数Set，兼备压缩空间和动态扩容）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intset-%E5%8D%87%E7%BA%A7"><span class="toc-number">1.3.1.</span> <span class="toc-text">IntSet 升级</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E5%A2%9E"><span class="toc-number">1.3.2.</span> <span class="toc-text">新增</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dict-%E5%8F%8C%E5%93%88%E5%B8%8C%E8%A1%A8%E7%BB%84%E6%88%90%E7%9A%84%E5%AD%97%E5%85%B8%E5%8A%A8%E6%80%81%E6%89%A9%E5%AE%B9%E6%94%B6%E7%BC%A9%E6%B8%90%E8%BF%9B%E5%BC%8Frehash"><span class="toc-number">1.4.</span> <span class="toc-text">Dict
+（双哈希表组成的字典，动态扩容收缩，渐进式rehash）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#dict-%E7%9A%84%E6%89%A9%E5%AE%B9"><span class="toc-number">1.4.1.</span> <span class="toc-text">Dict 的扩容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dict-%E7%9A%84%E6%94%B6%E7%BC%A9"><span class="toc-number">1.4.2.</span> <span class="toc-text">Dict 的收缩</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rehash"><span class="toc-number">1.4.3.</span> <span class="toc-text">Rehash</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ziplist%E8%BF%9E%E7%BB%AD%E5%86%85%E5%AD%98%E7%9A%84%E9%93%BE%E8%A1%A8"><span class="toc-number">1.5.</span> <span class="toc-text">ZipList（连续内存的链表）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ziplistentry"><span class="toc-number">1.5.1.</span> <span class="toc-text">ZipListEntry</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#encoding-%E7%BC%96%E7%A0%81"><span class="toc-number">1.5.1.1.</span> <span class="toc-text">Encoding 编码</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E9%94%81%E6%9B%B4%E6%96%B0%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.2.</span> <span class="toc-text">连锁更新问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#quicklist%E4%BB%A5ziplist%E8%8A%82%E7%82%B9%E7%9A%84%E5%8F%8C%E7%AB%AF%E9%93%BE%E8%A1%A8"><span class="toc-number">1.6.</span> <span class="toc-text">QuickList（以ZipList节点的双端链表）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%8B%E7%BC%A9%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="toc-number">1.6.1.</span> <span class="toc-text">压缩内存配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%8F%8A%E7%BB%93%E6%9E%84"><span class="toc-number">1.6.2.</span> <span class="toc-text">代码及结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#skiplist%E8%B7%B3%E8%A1%A8"><span class="toc-number">1.7.</span> <span class="toc-text">SkipList（跳表）</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%B8%B8%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/" title="Redis常用的数据类型">Redis常用的数据类型</a><time datetime="2024-07-21T08:49:42.000Z" title="发表于 2024-07-21 16:49:42">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/Redis/%E5%BA%95%E5%B1%82/Redis%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="Redis底层数据结构">Redis底层数据结构</a><time datetime="2024-07-21T08:37:24.000Z" title="发表于 2024-07-21 16:37:24">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" title="10-垃圾回收器">10-垃圾回收器</a><time datetime="2024-07-21T03:35:10.000Z" title="发表于 2024-07-21 11:35:10">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/9-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/" title="9-垃圾回收算法">9-垃圾回收算法</a><time datetime="2024-07-21T03:35:03.000Z" title="发表于 2024-07-21 11:35:03">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/8-%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E9%9C%80%E8%A6%81%E5%9B%9E%E6%94%B6/" title="8-如何判断需要回收">8-如何判断需要回收</a><time datetime="2024-07-21T03:34:56.000Z" title="发表于 2024-07-21 11:34:56">2024-07-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
