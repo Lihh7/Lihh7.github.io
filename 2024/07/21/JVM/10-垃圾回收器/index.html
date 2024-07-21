@@ -1,13 +1,15 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>10-垃圾回收器 | Lihh7's Blog</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta property="og:type" content="article">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>10-垃圾回收器 | Lihh7's Blog</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="垃圾回收器  为什么要分代？  大部分对象都是创建出来然后不再使用，比如订单数据 老年代存放长期存活的对象，比如 Spring 的大部分 Bean 对象，不会回收 默认设置中，新生代远小于老年代 因此：  可以调整年轻代和老年代的比例 采用不同的垃圾回收算法，新生代使用复制算法（清除的对象多，复制少）；老年代可以标记-清除或者标记-整理 分代设计可以只回收新生代（Minor">
+<meta property="og:type" content="article">
 <meta property="og:title" content="10-垃圾回收器">
 <meta property="og:url" content="http://example.com/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/index.html">
 <meta property="og:site_name" content="Lihh7&#39;s Blog">
+<meta property="og:description" content="垃圾回收器  为什么要分代？  大部分对象都是创建出来然后不再使用，比如订单数据 老年代存放长期存活的对象，比如 Spring 的大部分 Bean 对象，不会回收 默认设置中，新生代远小于老年代 因此：  可以调整年轻代和老年代的比例 采用不同的垃圾回收算法，新生代使用复制算法（清除的对象多，复制少）；老年代可以标记-清除或者标记-整理 分代设计可以只回收新生代（Minor">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
 <meta property="article:published_time" content="2024-07-21T03:35:10.000Z">
-<meta property="article:modified_time" content="2024-07-21T03:35:10.475Z">
+<meta property="article:modified_time" content="2024-07-21T08:26:03.647Z">
 <meta property="article:author" content="Lihh">
-<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
   root: '/',
@@ -53,8 +55,8 @@
   isPost: true,
   isHome: false,
   isHighlightShrink: false,
-  isToc: false,
-  postUpdate: '2024-07-21 11:35:10'
+  isToc: true,
+  postUpdate: '2024-07-21 16:26:03'
 }</script><script>(win=>{
       win.saveToLocal = {
         set: (key, value, ttl) => {
@@ -151,8 +153,217 @@
         }
       }
       detectApple()
-    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh7's Blog"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">10-垃圾回收器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-21T03:35:10.000Z" title="发表于 2024-07-21 11:35:10">2024-07-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-21T03:35:10.475Z" title="更新于 2024-07-21 11:35:10">2024-07-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="10-垃圾回收器"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container">
-</article><div class="tag_share"><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/07/21/JVM/9-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/" title="9-垃圾回收算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">9-垃圾回收算法</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lihh</div><div class="author-info__description">专注一点，登峰造极</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lihh7"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/Lihh7" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" title="10-垃圾回收器">10-垃圾回收器</a><time datetime="2024-07-21T03:35:10.000Z" title="发表于 2024-07-21 11:35:10">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/9-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/" title="9-垃圾回收算法">9-垃圾回收算法</a><time datetime="2024-07-21T03:35:03.000Z" title="发表于 2024-07-21 11:35:03">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/8-%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E9%9C%80%E8%A6%81%E5%9B%9E%E6%94%B6/" title="8-如何判断需要回收">8-如何判断需要回收</a><time datetime="2024-07-21T03:34:56.000Z" title="发表于 2024-07-21 11:34:56">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/7-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/" title="7-运行时数据区域">7-运行时数据区域</a><time datetime="2024-07-21T03:34:42.000Z" title="发表于 2024-07-21 11:34:42">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/6-JDK9%E4%B9%8B%E5%90%8E%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" title="6-JDK9之后的类加载器">6-JDK9之后的类加载器</a><time datetime="2024-07-21T03:34:26.000Z" title="发表于 2024-07-21 11:34:26">2024-07-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh7's Blog"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">10-垃圾回收器</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-21T03:35:10.000Z" title="发表于 2024-07-21 11:35:10">2024-07-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-21T08:26:03.647Z" title="更新于 2024-07-21 16:26:03">2024-07-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="10-垃圾回收器"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="垃圾回收器">垃圾回收器</h1>
+<blockquote>
+<p>为什么要分代？</p>
+</blockquote>
+<p><strong>大部分对象都是创建出来然后不再使用</strong>，比如订单数据</p>
+<p>老年代存放长期存活的对象，比如 Spring 的大部分 Bean
+对象，不会回收</p>
+<p>默认设置中，<strong>新生代远小于老年代</strong></p>
+<p>因此：</p>
+<ul>
+<li><p>可以调整年轻代和老年代的比例</p></li>
+<li><p><strong>采用不同的垃圾回收算法</strong>，新生代使用复制算法（清除的对象多，复制少）；老年代可以标记-清除或者标记-整理</p></li>
+<li><p>分代设计<strong>可以只回收新生代</strong>（Minor
+GC），不需要整个堆进行回收。减少 STW</p></li>
+</ul>
+<p>垃圾回收器分为年轻代和老年代回收器，除了 G1
+之外其他都需要组合使用</p>
+<ul>
+<li><p><strong>Serial + Serial Old</strong>（串行单线程）</p>
+<p>年轻代 <strong>复制</strong></p>
+<p>老年代<strong>标记-整理</strong></p></li>
+<li><p><strong>ParNew + CMS</strong>（关注暂停时间）</p>
+<p>年轻代 <strong>复制</strong></p>
+<p>老年代 <strong>标记-清除+整理</strong></p>
+<p>老年代CMS回收：初始标记（STW）+并发标记+重新标记（STW）+并发清除</p>
+<p>老年代过多，退化 Serial Old</p>
+<p>关注点：STW时间，浮动垃圾，碎片问题，退化</p></li>
+<li><p><strong>Parallel Scavenge + Parallel
+Old</strong>（关注吞吐量，自动分配堆内存）</p>
+<p>年轻代 <strong>复制</strong></p>
+<p>老年代 <strong>标记-清除+整理</strong></p>
+<p>关注点：吞吐量，自动分配堆内存</p></li>
+<li><p><strong>G1</strong>（较大堆同时关注暂停时间）</p>
+<p>最大特点：选择回收，而不是每次都要回收完</p>
+<p>年轻代 <strong>复制</strong></p>
+<p>混合回收 <strong>复制</strong></p>
+<p>混合回收流程：初始标记（STW）+并发标记+最终标记（STW）+并发复制</p>
+<p>全满了，退化 Serial Old</p>
+<p>关注点：复制算法无碎片，选择回收可控延迟</p></li>
+</ul>
+<p><img src="垃圾回收器.png" /></p>
+<hr />
+<h2 id="年轻代--serial-垃圾回收器">年轻代- Serial 垃圾回收器</h2>
+<p><strong>单线程串行</strong>的回收年代垃圾回收器，采用<strong>复制算法</strong></p>
+<p>优点：单CPU吞吐量出色</p>
+<p>缺点：多CPU吞吐量不如其他，堆内存过大 STW 过大</p>
+<p>适用：Java 编写的客户端或者硬件配置有限的场景</p>
+<p><img src="Serial垃圾回收器.png" /></p>
+<h2 id="老年代--serialold-垃圾回收器">老年代- SerialOld 垃圾回收器</h2>
+<p>Serial
+的老年代版本，单线程串行。采用<strong>标记-整理算法</strong></p>
+<p>CMS特殊情况会调用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+UseSerialGC</span><br></pre></td></tr></table></figure>
+<p><img src="Serial垃圾回收器.png" /></p>
+<hr />
+<h2 id="年轻代--parnew-垃圾回收器">年轻代- ParNew 垃圾回收器</h2>
+<p>本质上是 Serial 在多CPU下的优化，采用多线程进行垃圾回收</p>
+<p><strong>复制算法</strong></p>
+<p>优点：</p>
+<ul>
+<li>多CPU的STW停顿时间短</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>吞吐量和停顿时间不如 G1</li>
+</ul>
+<p>适用：</p>
+<p>和 CMS 老年代垃圾回收器搭配</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//新生代使用 ParNew</span><br><span class="line">//老年代使用 串行回收器</span><br><span class="line">-XX:+UseParNewGC</span><br></pre></td></tr></table></figure>
+<p><img src="ParNew垃圾回收器.png" /></p>
+<h2 id="老年代--cmsconcurrent-mark-sweep垃圾回收器">老年代-
+CMS（Concurrent Mark Sweep）垃圾回收器</h2>
+<p>采用<strong>标记清除+整理</strong>算法，<strong>关注的是暂停时间</strong></p>
+<p>优点：</p>
+<ul>
+<li>停顿时间短，用户体验好</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p><strong>内存碎片</strong>：虽然 CMS 会在 Full GC
+后整理，会导致暂停。可以调整设置为N次</p></li>
+<li><p><strong>退化问题</strong>：老年代内存不足，退化为 Serial Old
+回收老年代</p></li>
+<li><p><strong>浮动垃圾问题</strong>：并发清理过程中产生的对象垃圾不能被清理，要等到下一次。</p></li>
+</ul>
+<p>适用：用户请求频率高的场景</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:UseConcMarkSweepGC</span><br></pre></td></tr></table></figure>
+<p><img src="CMS垃圾回收器.png" /></p>
+<ol type="1">
+<li><p><strong>初始标记（STW）</strong>：用极短时间标记GC
+Roots能直接关联的对象</p></li>
+<li><p><strong>并发标记</strong>：标记所有对象，用户进程不用暂停（占用CPU高会影响用户进程）</p></li>
+<li><p><strong>重新标记（STW）</strong>：并发容易错标，漏标。需要重新标记（停下来）</p></li>
+<li><p><strong>并发清理</strong>：不需要暂停</p></li>
+</ol>
+<hr />
+<h2 id="年轻代--parallel-scavenge-回收器">年轻代- Parallel Scavenge
+回收器</h2>
+<p><strong>关注吞吐量</strong>，<strong>自动调整堆内存大小</strong>，是JDK8默认的年轻代垃圾回收器</p>
+<p><strong>复制算法</strong></p>
+<p>优点：</p>
+<ul>
+<li>吞吐量高，手动可控</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不能保证单次的停顿时间</li>
+</ul>
+<p>适合：</p>
+<p>后台任务，不需要交互，并且容易产生大量对象</p>
+<p><img src="ParallelScavenge垃圾回收器.png" /></p>
+<h2 id="老年代--parallel-old-垃圾回收器">老年代- Parallel Old
+垃圾回收器</h2>
+<p><strong>标记-清除+整理</strong>算法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-XX:+UseParallelGC 或者</span><br><span class="line">-XX:+UseParallelOldGC </span><br><span class="line">自动组合使用</span><br></pre></td></tr></table></figure>
+<p><strong>可以手动设置最大暂停时间（尽力）和吞吐量</strong></p>
+<p>减少最大暂停时间，就会减少堆内存分配，减少每次回收需要的范围从而减少时间</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//每次回收最大停顿毫秒</span><br><span class="line">-XX:MaxGCPauseMillis=n</span><br><span class="line"></span><br><span class="line">//用户线程时间=n/n+1</span><br><span class="line">//默认99</span><br><span class="line">-XX:GCTimeRatio=n</span><br><span class="line"></span><br><span class="line">//自动调整内存，根据前两个指标</span><br><span class="line">//默认开启</span><br><span class="line">//最好不要设置堆内存的最大值</span><br><span class="line">-XX：+UseAdaptiveSizePolicy</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="g1-grabage-first垃圾回收器">G1 （Grabage First）垃圾回收器</h2>
+<ul>
+<li><p>Parallel Scavenge
+关注<strong>吞吐量</strong>，允许设置<strong>最大暂停时间</strong>，但是会减少年轻代的可用空间</p></li>
+<li><p>CMS关注暂停时间，但是吞吐量下降了</p></li>
+</ul>
+<p>设计目标为融合优点：</p>
+<ul>
+<li><p><strong>支持巨大的堆回收，并能有较大吞吐量</strong></p></li>
+<li><p>支持多CPU并行垃圾回收</p></li>
+<li><p>允许设置最大暂停时间</p></li>
+</ul>
+<p>JDK9后默认</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:UseG1GC</span><br></pre></td></tr></table></figure>
+<p>优点：</p>
+<ul>
+<li><p>延迟可控</p></li>
+<li><p>整体复制算法，不会有碎片</p></li>
+<li><p>标记的 STAB 算法效率高</p></li>
+</ul>
+<h3 id="内存结构">内存结构</h3>
+<p>G1之前一般都是连续的</p>
+<p><img src="G1之前的堆内存空间.png" /></p>
+<p>G1之后的内存</p>
+<p>整个堆分为多个大小相等的区域，称之为
+<strong>区Region</strong>，区域<strong>不要求连续</strong>。</p>
+<p>分为 Eden，Survivor，Old 区，大小通常是 堆空间 / 2048</p>
+<p>也可以设置参数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:G1HeapRegionSize=32m</span><br></pre></td></tr></table></figure>
+<p><strong>Region size必须是2的指数幂</strong>，取值范围从1M到32M</p>
+<p><img src="G1的内存结构.png" /></p>
+<h3 id="算法">算法</h3>
+<p>两种回收</p>
+<ul>
+<li><p>年轻代回收（Young GC）</p></li>
+<li><p>混合回收（Mixed GC）</p></li>
+</ul>
+<p>特殊：</p>
+<ul>
+<li>Full GC</li>
+</ul>
+<h4 id="年轻代回收">年轻代回收</h4>
+<p>回收 Eden 和 Survivor 区不用的对象，会导致 STW</p>
+<p>可以设置参数最大暂停时间（尽可能）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:MaxGCPauseMills=n(默认200)</span><br></pre></td></tr></table></figure>
+<ol type="1">
+<li><p>新创建的对象会放在
+Eden，如果<strong>年轻代不足</strong>（年轻代占了总堆的60%），无法分配时会触发
+Young GC</p></li>
+<li><p><strong>标记</strong>出 Eden 和 Survivor 区域的存活对象</p></li>
+<li><p>根据 <strong>配置的暂停时间</strong>
+<strong>选择</strong>某些区域 <strong>复制</strong> 到新的 Survivor
+区（age+1），然后清空这些区域</p></li>
+<li><p>Survivor 存活对象也会搬运到另一个 Survivor （年龄+1）</p></li>
+<li><p>年龄到达阈值，将被放入老年代</p></li>
+</ol>
+<blockquote>
+<p>如何选择 Region 回收？</p>
+</blockquote>
+<p>Young GC 回收过程中 G1 会<strong>记录每个 Eden 和 Survivor
+的平均耗时</strong>，作为参考。</p>
+<p>根据配置的最大暂停时间计算本次回收最多能回收多少个 Region</p>
+<h4 id="晋升">晋升</h4>
+<ol type="1">
+<li><p><strong>年龄阈值</strong>晋升</p></li>
+<li><p><strong>部分对象如果大小超过 Region
+的一半</strong>，直接放入老年代，这部分老年代是 Humongous
+区。对象过大还会横跨多个 Region</p></li>
+</ol>
+<h4 id="混合回收">混合回收</h4>
+<p>Old老年代越来越多，总堆占有率到达阈值会触发混合
+MixedGC，会开始回收<strong>所有年轻代和部分老年代</strong>的对象以及大对象区，采用
+<strong>复制算法</strong> 完成。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:InitiatingHeapOccupancyPercent默认45%</span><br></pre></td></tr></table></figure>
+<p>流程（类似CMS，但是重新标记改为了<strong>最终标记</strong>，并且使用了<strong>复制</strong>算法）：</p>
+<ol type="1">
+<li><p><strong>初始标记</strong>：标记GC Root</p></li>
+<li><p><strong>并发标记</strong>：将第一步的GC Root
+引用的标记为存活</p></li>
+<li><p><strong>最终标记</strong>：标记一些引用改变漏标的对象，<strong>不管新创建不关联的对象（效率高）</strong></p></li>
+<li><p><strong>并发复制清理：</strong>
+没有内存碎片，并且是<strong>选择存活率低的老年代</strong>进行<strong>复制</strong></p></li>
+</ol>
+<p><img src="G1混合回收.png" /></p>
+<h4 id="full-gc">Full GC</h4>
+<p>如果清理过程发现连<strong>可以供给复制的空 Region
+都没了</strong>，就要 Full
+GC。<strong>单线程</strong>执行<strong>标记-整理</strong>算法，会导致用户线程暂停。尽量保证有一定的堆内存，不触发这个</p>
+</article><div class="tag_share"><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/07/21/JVM/9-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/" title="9-垃圾回收算法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">9-垃圾回收算法</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/21/JVM/1-%E5%88%9D%E5%A7%8BJVM/" title="1-初始JVM"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">1-初始JVM</div></div></a></div><div><a href="/2024/07/21/JVM/2-%E5%AD%97%E8%8A%82%E7%A0%81%E6%96%87%E4%BB%B6%E8%AF%A6%E8%A7%A3/" title="2-字节码文件详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">2-字节码文件详解</div></div></a></div><div><a href="/2024/07/21/JVM/3-%E7%B1%BB%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" title="3-类的生命周期"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">3-类的生命周期</div></div></a></div><div><a href="/2024/07/21/JVM/4-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E7%9A%84%E5%88%86%E7%B1%BB/" title="4-类加载器的分类"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">4-类加载器的分类</div></div></a></div><div><a href="/2024/07/21/JVM/5-%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6/" title="5-双亲委派机制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">5-双亲委派机制</div></div></a></div><div><a href="/2024/07/21/JVM/6-JDK9%E4%B9%8B%E5%90%8E%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" title="6-JDK9之后的类加载器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-21</div><div class="title">6-JDK9之后的类加载器</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Lihh</div><div class="author-info__description">专注一点，登峰造极</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/Lihh7"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/Lihh7" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">垃圾回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3--serial-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.1.</span> <span class="toc-text">年轻代- Serial 垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E5%B9%B4%E4%BB%A3--serialold-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.2.</span> <span class="toc-text">老年代- SerialOld 垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3--parnew-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">年轻代- ParNew 垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E5%B9%B4%E4%BB%A3--cmsconcurrent-mark-sweep%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.4.</span> <span class="toc-text">老年代-
+CMS（Concurrent Mark Sweep）垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3--parallel-scavenge-%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.5.</span> <span class="toc-text">年轻代- Parallel Scavenge
+回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%80%81%E5%B9%B4%E4%BB%A3--parallel-old-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.6.</span> <span class="toc-text">老年代- Parallel Old
+垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#g1-grabage-first%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">1.7.</span> <span class="toc-text">G1 （Grabage First）垃圾回收器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="toc-number">1.7.1.</span> <span class="toc-text">内存结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%97%E6%B3%95"><span class="toc-number">1.7.2.</span> <span class="toc-text">算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3%E5%9B%9E%E6%94%B6"><span class="toc-number">1.7.2.1.</span> <span class="toc-text">年轻代回收</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%99%8B%E5%8D%87"><span class="toc-number">1.7.2.2.</span> <span class="toc-text">晋升</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E5%9B%9E%E6%94%B6"><span class="toc-number">1.7.2.3.</span> <span class="toc-text">混合回收</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#full-gc"><span class="toc-number">1.7.2.4.</span> <span class="toc-text">Full GC</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/10-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" title="10-垃圾回收器">10-垃圾回收器</a><time datetime="2024-07-21T03:35:10.000Z" title="发表于 2024-07-21 11:35:10">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/9-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95/" title="9-垃圾回收算法">9-垃圾回收算法</a><time datetime="2024-07-21T03:35:03.000Z" title="发表于 2024-07-21 11:35:03">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/8-%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E9%9C%80%E8%A6%81%E5%9B%9E%E6%94%B6/" title="8-如何判断需要回收">8-如何判断需要回收</a><time datetime="2024-07-21T03:34:56.000Z" title="发表于 2024-07-21 11:34:56">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/7-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F/" title="7-运行时数据区域">7-运行时数据区域</a><time datetime="2024-07-21T03:34:42.000Z" title="发表于 2024-07-21 11:34:42">2024-07-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/07/21/JVM/6-JDK9%E4%B9%8B%E5%90%8E%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" title="6-JDK9之后的类加载器">6-JDK9之后的类加载器</a><time datetime="2024-07-21T03:34:26.000Z" title="发表于 2024-07-21 11:34:26">2024-07-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
   window.MathJax = {
     tex: {
       inlineMath: [['$', '$'], ['\\(', '\\)']],
