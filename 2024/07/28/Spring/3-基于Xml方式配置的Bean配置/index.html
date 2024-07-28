@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>3-基于Xml方式配置的Bean配置 | Lihh 的小破站</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍Spring中常用的xml配置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3-基于Xml方式配置的Bean配置">
+<meta property="og:url" content="http://example.com/2024/07/28/Spring/3-%E5%9F%BA%E4%BA%8EXml%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE%E7%9A%84Bean%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Lihh 的小破站">
+<meta property="og:description" content="介绍Spring中常用的xml配置">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-07-28T02:16:55.000Z">
+<meta property="article:modified_time" content="2024-07-28T02:26:50.614Z">
+<meta property="article:author" content="Lihh">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/07/28/Spring/3-%E5%9F%BA%E4%BA%8EXml%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE%E7%9A%84Bean%E9%85%8D%E7%BD%AE/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '3-基于Xml方式配置的Bean配置',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-07-28 10:26:50'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">30</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh 的小破站"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">3-基于Xml方式配置的Bean配置</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-28T02:16:55.000Z" title="发表于 2024-07-28 10:16:55">2024-07-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-07-28T02:26:50.614Z" title="更新于 2024-07-28 10:26:50">2024-07-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Spring/">Spring</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="3-基于Xml方式配置的Bean配置"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="基于xml方式配置的bean配置">基于Xml方式配置的Bean配置</h1>
+<h2 id="常见配置">常见配置</h2>
+<p><img src="Xml配置方式.png" /></p>
+<hr />
+<h2 id="id-配置">id 配置</h2>
+<p>作为 getBean 的唯一标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>获取 bean</p>
+<p>在applicationContext -&gt; BeanFactory -&gt; Single...</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">applicationContext.getBean(<span class="string">&quot;userDao&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>如果不配置id，则Spring会把当前Bean实例的全限定名作为beanName</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">applicationContext.getBean(<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>);</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="name-别名配置">name 别名配置</h2>
+<p>可以根据别名获取bean，在applicationContext -&gt; BeanFactory -&gt;
+AliasMap</p>
+<p>如果不配 id 只配 name，那么第一个别名就是 id</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">name</span>=<span class="string">&quot;aaa,bbb&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="bean的作用范围">Bean的作用范围</h2>
+<ul>
+<li><p><strong><code>singleton</code>：单例</strong>，默认值。Spring
+容器创建的时候就会进行 Bean 的实例化，存储到单例池中，每次 getBean
+都是从单例池中获取相同的 Bean 实例</p></li>
+<li><p><strong><code>prototype</code>：原型</strong>，Spring
+容器初始化不会创建 Bean 实例，调用 getBean
+才会实例化，每次都是创建一个新的 Bean 实例</p></li>
+</ul>
+<p>当前环境如果是基础 Spring 环境，那么 scope 只有两个，如果 MVC
+环境，还有 <code>request</code>，<code>session</code></p>
+<hr />
+<h2 id="bean-的延迟加载">Bean 的延迟加载</h2>
+<p>当Spring容器创建的时候，<strong>不会立即创建Bean实例</strong>，等待<strong>用到时在创建
+Bean 实例并存储到单例池</strong>中去，后续在使用该 Bean
+直接从单例池获取即可，<strong>本质上该Bean还是单例的</strong></p>
+<p>只对 ApplicationContext 有效，Beanfactory一直是延迟加载</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span> <span class="attr">lazy-init</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="bean-的初始化和销毁方法配置">Bean 的初始化和销毁方法配置</h2>
+<p>Bean在被实例化后，可以执行指定的初始化方法完成一些初始化的操作，Bean在销毁之前也可以执行指定的销毁方法完成一些操作。</p>
+<p>（先构造函数，再初始化）</p>
+<p>（但是销毁方法可能没执行，ApplicationContext就回收了）</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span> <span class="attr">init-method</span>=<span class="string">&quot;init&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">destroy-method</span>=<span class="string">&quot;destroy&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserDaoImpl</span> <span class="keyword">implements</span> <span class="title class_">UserDao</span> &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">UserDaoImpl</span><span class="params">()</span> &#123; System.out.println(<span class="string">&quot;UserDaoImpl创建了...&quot;</span>); &#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span>&#123; System.out.println(<span class="string">&quot;初始化方法...&quot;</span>); &#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span>&#123; System.out.println(<span class="string">&quot;销毁方法...&quot;</span>); &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时还可以通过实现 InitializingBean 接口，完成一些 Bean
+的初始化操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserDaoImpl</span> <span class="keyword">implements</span> <span class="title class_">UserDao</span>, InitializingBean &#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="title function_">UserDaoImpl</span><span class="params">()</span> &#123;System.out.println(<span class="string">&quot;UserDaoImpl创建了...&quot;</span>);&#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;System.out.println(<span class="string">&quot;初始化方法...&quot;</span>);&#125;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span>&#123;System.out.println(<span class="string">&quot;销毁方法...&quot;</span>);&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">//执行时机早于init-method配置的方法</span></span><br><span class="line">	<span class="comment">//属性配置（set方法）之后</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;InitializingBean...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="bean的实例化配置">Bean的实例化配置</h2>
+<p>Spring的实例化方式主要如下两种：</p>
+<ul>
+<li><p><strong>构造方式实例化</strong>：底层通过构造方法（反射拿到它）对Bean进行实例化</p></li>
+<li><p><strong>工厂方式实例化</strong>：底层通过调用<strong>自定义的工厂方法</strong>对Bean进行实例化</p></li>
+</ul>
+<h3 id="构造方法实例化配置">构造方法实例化配置</h3>
+<p>有参构造在实例化Bean时，需要参数的注入，通过
+<code>&lt;constructor-arg&gt;</code> 标签，嵌入在
+<code>&lt;bean&gt;</code> 标签内部提供构造参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//有参构造方法</span></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">UserDaoImpl</span><span class="params">(String name)</span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>这个 <code>constructor-arg</code> 标签只要是创建 Bean
+需要的参数都可以用到它</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">value</span>=<span class="string">&quot;haohao&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="工厂方法实例化配置">工厂方法实例化配置</h3>
+<p>工厂方式实例化 Bean，分为三种</p>
+<ul>
+<li><p><strong>静态工厂方法实例化Bean</strong></p></li>
+<li><p><strong>实例工厂方法实例化Bean</strong></p></li>
+<li><p><strong>实现FactoryBean规范延迟实例化Bean</strong></p></li>
+</ul>
+<h4 id="静态工厂实例化">静态工厂实例化</h4>
+<p>静态工厂方法实例化Bean，其实就是<strong>定义一个工厂类，提供一个静态方法用于生产Bean实例</strong>，在将该工厂类及其静态方法配置给
+Spring 即可</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//工厂类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserDaoFactoryBean</span> &#123;</span><br><span class="line">	<span class="comment">//非静态工厂方法</span></span><br><span class="line">	...</span><br><span class="line">	<span class="comment">//返回值作为 Bean</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> UserDao <span class="title function_">getUserDao</span><span class="params">(String name)</span>&#123;</span><br><span class="line">		<span class="comment">//可以在此编写一些其他逻辑代码</span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">UserDaoImpl</span>();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意：<code>&lt;constructor-arg&gt;</code>
+标签不仅仅是为构造方法传递参数，只要是<strong>为了实例化对象而传递的参数都可以通过
+<code>&lt;constructor-arg&gt;</code> 标签完成</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.factory.UserDaoFactoryBean&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;getUserDao&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">value</span>=<span class="string">&quot;haohao&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="实例工厂方法">实例工厂方法</h4>
+<p>实例工厂方法，也就是<strong>非静态工厂方法产生 Bean
+实例</strong>。与静态工厂方式比较，该方式<strong>需要先有工厂对象，在用工厂对象去调用非静态方法</strong>，所以在进行配置时，要先配置工厂
+Bean，在配置目标Bean</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//工厂类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserDaoFactoryBean2</span> &#123;</span><br><span class="line">	<span class="comment">//非静态工厂方法</span></span><br><span class="line">	<span class="keyword">public</span> UserDao <span class="title function_">getUserDao</span><span class="params">(String name)</span>&#123;</span><br><span class="line">		<span class="comment">//可以在此编写一些其他逻辑代码</span></span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">UserDaoImpl</span>();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样配置以后，单例池既有工厂 Bean 实例，也有目标 Bean 的实例</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 配置实例工厂Bean --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDaoFactoryBean2&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.factory.UserDaoFactoryBean2&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 配置实例工厂Bean的哪个方法作为工厂方法 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">factory-bean</span>=<span class="string">&quot;userDaoFactoryBean2&quot;</span> <span class="attr">factory-method</span>=<span class="string">&quot;getUserDao&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">constructor-arg</span> <span class="attr">name</span>=<span class="string">&quot;name&quot;</span> <span class="attr">value</span>=<span class="string">&quot;haohao&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="实现-factorybean-规范延迟实例化-bean">实现 FactoryBean
+规范延迟实例化 Bean</h4>
+<p>Spring提供了FactoryBean的接口规范，FactoryBean接口定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">FactoryBean</span>&lt;T&gt; &#123;</span><br><span class="line">	<span class="type">String</span> <span class="variable">OBJECT_TYPE_ATTRIBUTE</span> <span class="operator">=</span> “factoryBeanObjectType” ;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//获得实例对象方法</span></span><br><span class="line">	T <span class="title function_">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//获得实例对象类型方法</span></span><br><span class="line">	Class&lt;?&gt; getObjectType();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">default</span> <span class="type">boolean</span> <span class="title function_">isSingleton</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>定义工厂实现这个接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserDaoFactoryBean3</span> <span class="keyword">implements</span> <span class="title class_">FactoryBean</span>&lt;UserDao&gt; &#123;</span><br><span class="line">	<span class="keyword">public</span> UserDao <span class="title function_">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">UserDaoImpl</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">public</span> Class&lt;?&gt; getObjectType() &#123;</span><br><span class="line">		<span class="keyword">return</span> UserDao.class;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>配置 FactoryBean 交由 Spring 管理即可，通过 Spring 容器根据 beanName
+可以正常获得UserDaoImpl</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.factory.UserDaoFactoryBean3&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">ClassPathxmlApplicationContext</span>(<span class="string">&quot;applicationContext.xml&quot;</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">userDao</span> <span class="operator">=</span> applicationContext.getBean(<span class="string">&quot;userDao&quot;</span>);</span><br><span class="line">System.out.println(userDao);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><strong>FactoryBean 被实例化了，并存储到了单例池
+singletonObjects</strong></p></li>
+<li><p>但是 <code>getObject()</code>
+方法尚未被执行，UserDaoImpl也没被实例化</p></li>
+<li><p><strong>当首次用到 UserDaoImpl 时，才调用
+<code>getObject()</code> </strong></p></li>
+<li><p>此工厂方式产生的Bean实例不会存储到单例池 singletonObjects
+中，<strong>会存储到 factoryBeanObjectCache
+缓存池中</strong>，并且后期每次使用到 userDao
+都从该缓存池中返回的是同一个 userDao 实例</p></li>
+</ul>
+<p>重点：<strong>工厂 Bean 丢进了单例池，但是工厂造的 Bean 放进工厂 Bean
+缓存中，延迟加载</strong></p>
+<hr />
+<h2 id="bean-的依赖注入的配置">Bean 的依赖注入的配置</h2>
+<p><img src="Bean依赖注入配置方式.png" /></p>
+<p>依赖注入的数据类型有如下三种：</p>
+<ul>
+<li><p><strong>普通数据类型</strong>，例如：String、int、boolean等，通过
+<code>value</code> 属性指定</p></li>
+<li><p><strong>引用数据类型</strong>，例如：UserDaoImpl、DataSource等，通过
+<code>ref</code> 属性指定</p></li>
+<li><p><strong>集合数据类型</strong>，例如：List、Map、Properties等</p></li>
+</ul>
+<h3 id="listset">List（Set）</h3>
+<p>注意提前写好 set 方法</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;strList&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">value</span>&gt;</span>haohao<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">value</span>&gt;</span>miaomiao<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>list 内部项是 bean，可以构造方法得到新的</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;objList&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>list 内部项是 bean，也可以通过引用</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--配置UserDao--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao2&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao3&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--配置UserService--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userService&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.service.impl.UserServiceImpl&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;objList&quot;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">list</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">bean</span>=<span class="string">&quot;userDao&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">ref</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">bean</span>=<span class="string">&quot;userDao2&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">ref</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">ref</span> <span class="attr">bean</span>=<span class="string">&quot;userDao3&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">ref</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">list</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Set 和 List 类似，不赘述。</p>
+<h3 id="map">Map</h3>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--注入值为字符串的Map集合--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;valueMap&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">map</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;aaa&quot;</span> <span class="attr">value</span>=<span class="string">&quot;AAA&quot;</span> /&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;bbb&quot;</span> <span class="attr">value</span>=<span class="string">&quot;BBB&quot;</span> /&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;ccc&quot;</span> <span class="attr">value</span>=<span class="string">&quot;CCC&quot;</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">map</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--注入值为对象的Map集合--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;objMap&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">map</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;ud&quot;</span> <span class="attr">value-ref</span>=<span class="string">&quot;userDao&quot;</span>/&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;ud2&quot;</span> <span class="attr">value-ref</span>=<span class="string">&quot;userDao2&quot;</span>/&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">&quot;ud3&quot;</span> <span class="attr">value-ref</span>=<span class="string">&quot;userDao3&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">map</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="properties-键值对">properties 键值对</h3>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;properties&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">props</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">prop</span> <span class="attr">key</span>=<span class="string">&quot;xxx&quot;</span>&gt;</span>XXX<span class="tag">&lt;/<span class="name">prop</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">prop</span> <span class="attr">key</span>=<span class="string">&quot;yyy&quot;</span>&gt;</span>YYY<span class="tag">&lt;/<span class="name">prop</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">props</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="自动装配方式">自动装配方式</h2>
+<p>如果被注入的属性类型是Bean引用的话，那么可以在
+<code>&lt;bean&gt;</code> 标签中使用 <code>autowire</code>
+属性去配置自动注入方式，属性值有两个</p>
+<ul>
+<li><p><strong><code>byName</code>：通过属性名自动装配</strong>，即去匹配
+<code>setXxx</code> 与 <code>id="xxx"（name="xxx"）</code>
+是否一致</p></li>
+<li><p><strong><code>byType</code>：通过 Bean
+的类型从容器中匹配</strong>，匹配出多个相同 Bean 类型时，报错</p></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userService&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.service.impl.UserServiceImpl&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">autowire</span>=<span class="string">&quot;byType&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="标签">标签</h2>
+<p>标签分类</p>
+<ul>
+<li><p><strong>默认标签</strong>：不用额外导入其他命名空间约束的标签，例如
+<code>&lt;bean&gt;</code> 标签</p></li>
+<li><p><strong>自定义标签</strong>：需要额外引入其他命名空间约束，并且通过前缀引用的标签，例如
+<code>&lt;context:property-placeholder&gt;</code></p></li>
+</ul>
+<p>Spring的默认标签用到的是Spring的默认命名空间，配置需要配
+<code>xmlns</code> 和 <code>schemaLocation</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/beans&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/beans</span></span></span><br><span class="line"><span class="string"><span class="tag">	http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>默认命名空间下的标签</p>
+<p><img src="默认命名空间下的标签.png" /></p>
+<h3 id="beans-标签">beans 标签</h3>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 配置测试环境下，需要加载的Bean实例 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">profile</span>=<span class="string">&quot;test&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 配置开发环境下，需要加载的Bean实例 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">profile</span>=<span class="string">&quot;dev&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以使用以下两种方式指定被激活的环境：</p>
+<ul>
+<li><p><strong>使用命令行动态参数</strong>，虚拟机参数位置加载
+<code>-Dspring.profiles.active=test</code></p></li>
+<li><p><strong>使用代码的方式设置环境变量</strong>
+<code>System.setProperty("spring.profiles.active","test")</code></p></li>
+</ul>
+<h3 id="import-标签">import 标签</h3>
+<p><code>&lt;import&gt;</code>
+标签，用于导入其他配置文件，项目变大后，就会导致一个配置文件内容过多，<strong>可以将一个配置文件根据业务某块进行拆分，拆分后，最终通过
+<code>&lt;import&gt;</code>
+标签导入到一个主配置文件中</strong>，项目加载主配置文件就连同
+<code>&lt;import&gt;</code> 导入的文件一并加载了</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--导入用户模块配置文件--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">import</span> <span class="attr">resource</span>=<span class="string">&quot;classpath:UserModuleApplicationContext.xml&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--导入商品模块配置文件--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">import</span> <span class="attr">resource</span>=<span class="string">&quot;classpath:ProductModuleApplicationContext.xml&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="alias-标签">Alias 标签</h3>
+<p><code>&lt;alias&gt;</code> 标签是为某个 Bean 添加别名，与在
+<code>&lt;bean&gt;</code> 标签上使用 name 属性添加别名的方式一样，我们为
+UserServiceImpl 指定四个别名：aaa、bbb、xxx、yyy</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--配置UserService--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userService&quot;</span> <span class="attr">name</span>=<span class="string">&quot;aaa,bbb&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.service.impl.UserServiceImpl&quot;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">ref</span>=<span class="string">&quot;userDao&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--指定别名--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">alias</span> <span class="attr">name</span>=<span class="string">&quot;userService&quot;</span> <span class="attr">alias</span>=<span class="string">&quot;xxx&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">alias</span> <span class="attr">name</span>=<span class="string">&quot;userService&quot;</span> <span class="attr">alias</span>=<span class="string">&quot;yyy&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="自定义标签">自定义标签</h3>
+<p>Spring的自定义标签需要引入外部的命名空间，并为外部的命名空间指定前缀，使用
+<code>&lt;前缀:标签&gt;</code>
+形式的标签，称之为自定义标签，自定义标签的解析流程也是 Spring
+xml扩展点方式之一。</p>
+<p>引入的方式如果是Spring的就复制搞多一份，如果是其他（需要先导入 maven
+坐标）可以参考网上的资料</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--默认标签--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;userDao&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.itheima.dao.impl.UserDaoImpl&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--自定义标签--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">context:property-placeholder</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mvc:annotation-driven</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dubbo:application</span> <span class="attr">name</span>=<span class="string">&quot;application&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Spring/">Spring</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="wechat,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/07/24/Linux/6-Linux%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/" title="6-Linux常用指令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">6-Linux常用指令</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/07/24/Spring/1-Spring%E7%AE%80%E4%BB%8B/" title="1-Spring简介"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-24</div><div class="title">1-Spring简介</div></div></a></div><div><a href="/2024/07/24/Spring/2-%E6%8E%A5%E5%8F%A3BeanFactory%E5%92%8CApplicationContext/" title="2-接口BeanFactory和ApplicationContext"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-24</div><div class="title">2-接口BeanFactory和ApplicationContext</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Exml%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE%E7%9A%84bean%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">基于Xml方式配置的Bean配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">常见配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#id-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">id 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#name-%E5%88%AB%E5%90%8D%E9%85%8D%E7%BD%AE"><span class="toc-number">1.3.</span> <span class="toc-text">name 别名配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bean%E7%9A%84%E4%BD%9C%E7%94%A8%E8%8C%83%E5%9B%B4"><span class="toc-number">1.4.</span> <span class="toc-text">Bean的作用范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bean-%E7%9A%84%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD"><span class="toc-number">1.5.</span> <span class="toc-text">Bean 的延迟加载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bean-%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E9%94%80%E6%AF%81%E6%96%B9%E6%B3%95%E9%85%8D%E7%BD%AE"><span class="toc-number">1.6.</span> <span class="toc-text">Bean 的初始化和销毁方法配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bean%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.</span> <span class="toc-text">Bean的实例化配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E5%AE%9E%E4%BE%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.1.</span> <span class="toc-text">构造方法实例化配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E5%AE%9E%E4%BE%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">1.7.2.</span> <span class="toc-text">工厂方法实例化配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%B7%A5%E5%8E%82%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="toc-number">1.7.2.1.</span> <span class="toc-text">静态工厂实例化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95"><span class="toc-number">1.7.2.2.</span> <span class="toc-text">实例工厂方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0-factorybean-%E8%A7%84%E8%8C%83%E5%BB%B6%E8%BF%9F%E5%AE%9E%E4%BE%8B%E5%8C%96-bean"><span class="toc-number">1.7.2.3.</span> <span class="toc-text">实现 FactoryBean
+规范延迟实例化 Bean</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bean-%E7%9A%84%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="toc-number">1.8.</span> <span class="toc-text">Bean 的依赖注入的配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#listset"><span class="toc-number">1.8.1.</span> <span class="toc-text">List（Set）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map"><span class="toc-number">1.8.2.</span> <span class="toc-text">Map</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#properties-%E9%94%AE%E5%80%BC%E5%AF%B9"><span class="toc-number">1.8.3.</span> <span class="toc-text">properties 键值对</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E6%96%B9%E5%BC%8F"><span class="toc-number">1.9.</span> <span class="toc-text">自动装配方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E7%AD%BE"><span class="toc-number">1.10.</span> <span class="toc-text">标签</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#beans-%E6%A0%87%E7%AD%BE"><span class="toc-number">1.10.1.</span> <span class="toc-text">beans 标签</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#import-%E6%A0%87%E7%AD%BE"><span class="toc-number">1.10.2.</span> <span class="toc-text">import 标签</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alias-%E6%A0%87%E7%AD%BE"><span class="toc-number">1.10.3.</span> <span class="toc-text">Alias 标签</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%87%E7%AD%BE"><span class="toc-number">1.10.4.</span> <span class="toc-text">自定义标签</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
