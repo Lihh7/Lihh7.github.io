@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>11.Pod配置 | Lihh 的小破站</title><meta name="author" content="Lihh"><meta name="copyright" content="Lihh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍kubernetes的Pod相关配置">
+<meta property="og:type" content="article">
+<meta property="og:title" content="11.Pod配置">
+<meta property="og:url" content="http://example.com/2024/12/14/K8S/11-Pod%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Lihh 的小破站">
+<meta property="og:description" content="介绍kubernetes的Pod相关配置">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png">
+<meta property="article:published_time" content="2024-12-14T14:50:41.000Z">
+<meta property="article:modified_time" content="2024-12-14T14:53:32.943Z">
+<meta property="article:author" content="Lihh">
+<meta property="article:tag" content="K8S">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/12/14/K8S/11-Pod%E9%85%8D%E7%BD%AE/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":500},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: true,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '11.Pod配置',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-12-14 22:53:32'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">54</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Lihh 的小破站"></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">11.Pod配置</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-12-14T14:50:41.000Z" title="发表于 2024-12-14 22:50:41">2024-12-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-12-14T14:53:32.943Z" title="更新于 2024-12-14 22:53:32">2024-12-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/K8S/">K8S</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="11.Pod配置"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="pod-配置">Pod 配置</h1>
+<p>可以用 explain 查看配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl explain pod.spec.containers.ports</span><br></pre></td></tr></table></figure>
+<h2 id="基本配置">基本配置</h2>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">pod-base</span></span><br><span class="line">	<span class="attr">namespace:</span> <span class="string">dev</span></span><br><span class="line">	<span class="attr">labels:</span></span><br><span class="line">		<span class="attr">user:</span> <span class="string">heima</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">	<span class="attr">containers:</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">nginx:1.17.1</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">busybox:1.30</span></span><br></pre></td></tr></table></figure>
+<h2 id="镜像拉取策略">镜像拉取策略</h2>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">pod-base</span></span><br><span class="line">	<span class="attr">namespace:</span> <span class="string">dev</span></span><br><span class="line">	<span class="attr">labels:</span></span><br><span class="line">		<span class="attr">user:</span> <span class="string">heima</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">	<span class="attr">containers:</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">nginx:1.17.1</span></span><br><span class="line">	  <span class="attr">imagePullPolicy:</span> <span class="string">Always</span> <span class="comment"># 用于设置镜像拉取策略</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">busybox:1.30</span></span><br></pre></td></tr></table></figure>
+<p><strong>imagePullPolicy，用于设置镜像拉取策略</strong>，kubernetes支持配置三种拉取策略：</p>
+<ul>
+<li><p>Always：总是从远程仓库拉取镜像（一直远程下载）</p></li>
+<li><p>IfNotPresent：本地有则使用本地镜像，本地没有则从远程仓库拉取镜像（本地有就本地
+本地没远程下载）</p></li>
+<li><p>Never：只使用本地镜像，从不去远程仓库拉取，本地没有就报错
+（一直使用本地）</p></li>
+</ul>
+<blockquote>
+<p>镜像 tag 为具体版本号，默认策略是 IfNotPresent</p>
+</blockquote>
+<blockquote>
+<p>镜像 tag 为 latest，默认策略为 always</p>
+</blockquote>
+<h2 id="启动命令">启动命令</h2>
+<p>busybox 并不是一个程序，而是类似于一个工具类的集合，kubernetes
+集群启动管理后，它会自动关闭。解决方法就是让其一直在运行，这就用到了command配置。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">pod-base</span></span><br><span class="line">	<span class="attr">namespace:</span> <span class="string">dev</span></span><br><span class="line">	<span class="attr">labels:</span></span><br><span class="line">		<span class="attr">user:</span> <span class="string">heima</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">	<span class="attr">containers:</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">nginx:1.17.1</span></span><br><span class="line">	  <span class="attr">imagePullPolicy:</span> <span class="string">Always</span> <span class="comment"># 用于设置镜像拉取策略</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">busybox:1.30</span></span><br><span class="line">	  <span class="attr">command:</span> [<span class="string">&quot;/bin/sh&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;touch /tmp/hello.txt;while true;do /bin/echo $(date +%T)&gt;&gt; /tmp/hello.txt; sleep 3; done;&quot;</span>]</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>指令的意思： "/bin/sh","-c", 使用sh执行命令<br />
+touch /tmp/hello.txt; 创建一个/tmp/hello.txt 文件 while true;do
+/bin/echo $(date +%T) &gt;&gt; /tmp/hello.txt; sleep 3; done;
+每隔3秒向文件中写入当前时间</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建Pod</span></span><br><span class="line">kubectl create -f pod-command.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看Pod状态</span></span><br><span class="line"><span class="comment"># 此时发现两个pod都正常运行了</span></span><br><span class="line">kubectl get pods pod-command -n dev</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入pod中的busybox容器，查看文件内容</span></span><br><span class="line"><span class="comment"># 补充一个命令: kubectl exec pod名称 -n 命名空间 -it -c 容器名称 /bin/sh 在容器内部执行命令</span></span><br><span class="line"><span class="comment"># 使用这个命令就可以进入某个容器的内部，然后进行相关操作了</span></span><br><span class="line"><span class="comment"># 比如，可以查看txt文件的内容</span></span><br><span class="line">kubectl <span class="built_in">exec</span> pod-command -n dev -it -c busybox /bin/sh</span><br><span class="line">/ <span class="comment"># tail -f /tmp/hello.txt</span></span><br><span class="line">13:35:35</span><br><span class="line">13:35:38</span><br><span class="line">13:35:41</span><br></pre></td></tr></table></figure>
+<p>kubernetes中的command、args两项其实是实现覆盖Dockerfile中 ENTRYPOINT
+的功能。</p>
+<ul>
+<li><p>如果command和args均没有写，那么用Dockerfile的配置。</p></li>
+<li><p>如果command写了，但args没有写，那么Dockerfile默认的配置会被忽略，执行输入的command</p></li>
+<li><p>如果command没写，但args写了，那么Dockerfile中配置的ENTRYPOINT的命令会被执行，使用当前args的参数</p></li>
+<li><p>如果command和args都写了，那么Dockerfile的配置被忽略，执行command并追加上args参数</p></li>
+</ul>
+<h2 id="环境变量">环境变量</h2>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">pod-env</span></span><br><span class="line">	<span class="attr">namespace:</span> <span class="string">dev</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">	<span class="attr">containers:</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">busybox</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">busybox:1.30</span></span><br><span class="line">	  <span class="attr">command:</span> [<span class="string">&quot;/bin/sh&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;while true;do /bin/echo $(date +%T);sleep 60; done;&quot;</span>]</span><br><span class="line">	  <span class="attr">env:</span> <span class="comment"># 设置环境变量列表</span></span><br><span class="line">	  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">&quot;username&quot;</span></span><br><span class="line">	    <span class="attr">value:</span> <span class="string">&quot;admin&quot;</span></span><br><span class="line">	  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">&quot;password&quot;</span></span><br><span class="line">	    <span class="attr">value:</span> <span class="string">&quot;123456&quot;</span></span><br></pre></td></tr></table></figure>
+<p>env，环境变量，用于在pod中的容器设置环境变量</p>
+<h2 id="端口设置">端口设置</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">kubectl explain pod.spec.containers.ports</span><br><span class="line"></span><br><span class="line">KIND: Pod</span><br><span class="line">VERSION: v1</span><br><span class="line">RESOURCE: ports &lt;[]Object&gt;</span><br><span class="line">FIELDS:</span><br><span class="line"><span class="comment"># 端口名称，如果指定，必须保证name在pod中是唯一的</span></span><br><span class="line">name &lt;string&gt; </span><br><span class="line"><span class="comment"># 容器要监听的端口(0&lt;x&lt;65536)</span></span><br><span class="line">containerPort&lt;<span class="built_in">integer</span>&gt; </span><br><span class="line"><span class="comment"># 容器要在主机上公开的端口，如果设置，主机上只能运行容器的一个副本(一般省略)</span></span><br><span class="line">hostPort &lt;<span class="built_in">integer</span>&gt; </span><br><span class="line"><span class="comment"># 要将外部端口绑定到的主机IP(一般省略)</span></span><br><span class="line">hostIP &lt;string&gt; </span><br><span class="line"><span class="comment"># 端口协议。必须是UDP、TCP或SCTP。默认为“TCP”。</span></span><br><span class="line">protocol &lt;string&gt; </span><br></pre></td></tr></table></figure>
+<p><strong>访问容器中的程序需要使用的是
+podIp:containerPort（Pod的IP+容器的端口）</strong></p>
+<h2 id="资源配额">资源配额</h2>
+<p>kubernetes 提供了对内存和 cpu 的资源进行配额的机制，这种机制主要通过
+resources 选项实现，他有两个子选项</p>
+<ul>
+<li><p><strong>limits：用于限制运行时容器的最大占用资源</strong>。当容器占用资源超过limits时会被终止，并进行重启</p></li>
+<li><p><strong>requests
+：用于设置容器需要的最小资源</strong>。如果环境资源不够，容器将无法启动</p></li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">	<span class="attr">name:</span> <span class="string">pod-resources</span></span><br><span class="line">	<span class="attr">namespace:</span> <span class="string">dev</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">	<span class="attr">containers:</span></span><br><span class="line">	<span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">	  <span class="attr">image:</span> <span class="string">nginx:1.17.1</span></span><br><span class="line">	  <span class="attr">resources:</span> <span class="comment"># 资源配额</span></span><br><span class="line">		  <span class="attr">limits:</span> <span class="comment"># 限制资源（上限）</span></span><br><span class="line">			  <span class="attr">cpu:</span> <span class="string">&quot;2&quot;</span> <span class="comment"># CPU限制，单位是core数</span></span><br><span class="line">			  <span class="attr">memory:</span> <span class="string">&quot;10Gi&quot;</span> <span class="comment"># 内存限制</span></span><br><span class="line">		  <span class="attr">requests:</span> <span class="comment"># 请求资源（下限）</span></span><br><span class="line">			  <span class="attr">cpu:</span> <span class="string">&quot;1&quot;</span> <span class="comment"># CPU限制，单位是core数</span></span><br><span class="line">			  <span class="attr">memory:</span> <span class="string">&quot;10Mi&quot;</span> <span class="comment"># 内存限制</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>cpu：core数，可以为整数或小数</p></li>
+<li><p>memory： 内存大小，可以使用Gi、Mi、G、M等形式</p></li>
+</ul>
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/K8S/">K8S</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" data-sites="wechat,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/12/14/K8S/12-Pod%E8%AF%A6%E8%A7%A3/" title="12.Pod详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">12.Pod详解</div></div></a></div><div class="next-post pull-right"><a href="/2024/12/14/K8S/10-Service/" title="10.Service"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">10.Service</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/12/02/K8S/1-kubernetes%E4%BB%8B%E7%BB%8D/" title="1.kubernetes介绍"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-02</div><div class="title">1.kubernetes介绍</div></div></a></div><div><a href="/2024/12/14/K8S/10-Service/" title="10.Service"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-14</div><div class="title">10.Service</div></div></a></div><div><a href="/2024/12/14/K8S/12-Pod%E8%AF%A6%E8%A7%A3/" title="12.Pod详解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-14</div><div class="title">12.Pod详解</div></div></a></div><div><a href="/2024/12/02/K8S/2-kubenetes%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/" title="2.kubernetes资源管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-02</div><div class="title">2.kubernetes资源管理</div></div></a></div><div><a href="/2024/12/02/K8S/4-yaml%E8%AF%AD%E8%A8%80/" title="4.yaml语言"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-02</div><div class="title">4.yaml语言</div></div></a></div><div><a href="/2024/12/14/K8S/6-Namespace/" title="6.Namespace"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-14</div><div class="title">6.Namespace</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#pod-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">Pod 配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="toc-number">1.1.</span> <span class="toc-text">基本配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E7%AD%96%E7%95%A5"><span class="toc-number">1.2.</span> <span class="toc-text">镜像拉取策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.</span> <span class="toc-text">启动命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">1.4.</span> <span class="toc-text">环境变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E8%AE%BE%E7%BD%AE"><span class="toc-number">1.5.</span> <span class="toc-text">端口设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E9%85%8D%E9%A2%9D"><span class="toc-number">1.6.</span> <span class="toc-text">资源配额</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('/img/%E5%B8%8C%E6%9C%9B%E4%BD%A0%E8%83%BD%E5%9C%A8.webp')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Lihh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
